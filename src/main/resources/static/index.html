@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ipscanner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="row align-items-center">
+        <div class="col fs-2 text-center text-bg-primary p-3" style="font-family: 'Verdana'">
+            IPSCANNER-1.0
+        </div>
+    </div>
+
+    <div class="row-auto mt-3 mb-3">
+        <div class="col text-left">
+            <div class="fs-5">ИНСТРУКЦИЯ</div>
+            <div class="fs-6">
+                1. Заполните форму ниже. Все поля обязательны.<br>
+                2. Введите начальный IP адрес. Допустимые значения: 0-255.<br>
+                3. Выберите префикс маски подсети (диапазон сканирования).<br>
+                4. Выберите количество потоков.<br>
+                5. Выберите диск для сохранения результатов сканирования.<br>
+                6. Нажмите кнопку СТАРТ.<br>
+                7. Программа найдет все SSL сертификаты по заданным адресам и найдет в них все доменные имена.<br>
+                8. Список найденных доменных имен будет сохранен в корневом каталоге диска.<br>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <form action="/result" method="post">
+        <div class="col-sm-6">
+            <div class="input-group mt-6 mb-3">
+                <span class="input-group-text">Начальный IP адрес и диапазон</span>
+                <input type="text" class="form-control" id="ip_byte_3" name="ip_byte_3" required
+                       minlength="1" maxlength="3" aria-label="Байт 3">
+                <span class="input-group-text">.</span>
+                <input type="text" class="form-control" id="ip_byte_2" name="ip_byte_2" required
+                       minlength="1" maxlength="3" aria-label="Байт 2">
+                <span class="input-group-text">.</span>
+                <input type="text" class="form-control" id="ip_byte_1" name="ip_byte_1" required
+                       minlength="1" maxlength="3" aria-label="Байт 1">
+                <span class="input-group-text">.</span>
+                <input type="text" class="form-control" id="ip_byte_0" name="ip_byte_0" required
+                       minlength="1" maxlength="3" aria-label="Байт 0">
+                <span class="input-group-text">/</span>
+                <select class="form-select" id="mask" name="mask" required>
+                    <option value="32">32</option>
+                    <option value="28">28</option>
+                    <option value="24">24</option>
+                    <option value="20">20</option>
+                    <option value="16">16</option>
+                    <option value="12">12</option>
+                    <option value="8">8</option>
+                    <option value="4">4</option>
+                    <option value="0">0</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3 mb-3">
+            <div class="col-sm-3">
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="threats">Количество потоков</label>
+                    <select class="form-select" id="threats" name="threats" required>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-sm-3">
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="disk">Системный диск</label>
+                    <select class="form-select" id="disk" name="disk" required>
+                        <option value="C">C:/</option>
+                        <option value="D">D:/</option>
+                        <option value="E">E:/</option>
+                        <option value="F">F:/</option>
+                        <option value="G">G:/</option>
+                        <option value="H">H:/</option>
+                        <option value="I">I:/</option>
+                        <option value="J">J:/</option>
+                        <option value="K">K:/</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mb-3">СТАРТ</button>
+        <button type="reset" class="btn btn-primary mb-3 ms-2">СБРОС</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+</html>
