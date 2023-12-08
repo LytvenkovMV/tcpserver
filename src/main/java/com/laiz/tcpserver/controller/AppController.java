@@ -21,7 +21,7 @@ public class AppController {
 
     @GetMapping("/")
     public String getIndex() {
-        return "index.html";
+        return "indexTest.html";
     }
 
     @PostMapping("/start")
