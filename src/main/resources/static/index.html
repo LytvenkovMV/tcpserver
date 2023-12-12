@@ -1,44 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>tcpserver</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JavaScript для начинающих</title>
+    <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-<div class="container">
-    <div class="row align-items-center">
-        <div class="col fs-2 text-center text-bg-primary p-3" style="font-family: 'Verdana'">
-            TCPSERVER-0.0.1
-        </div>
-    </div>
+<header>
+    <h1>JavaScript для начинающих</h1>
+    <div class="school-name">урок от ВебКадеми</div>
+</header>
 
-    <div class="row-auto mt-3 mb-3">
-        <div class="col text-left">
-            <div class="fs-5">ИНСТРУКЦИЯ</div>
-            <div class="fs-6">
-                1. Для запуска TCP сервера нажмите кнопку старт.<br>
-                2. После запуска можно подключиться к серверу и отправить сообщение.<br>
-                3. Номер порта 2404.<br>
-            </div>
-        </div>
+<!-- 💡 Свернуть все блоки кода: Ctrl + K;  Ctrl + 0 -->
+
+<!-- Пример с выбором элементов. Селекторы. CSS классы -->
+
+
+<div class="dom-example none">
+    <h1 class="heading-1" id="heading-1">Заголовок 1</h1>
+    <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus quae blanditiis eaque, at, eos ipsam
+        impedit, consequuntur tenetur magnam fugit atque. Quos perspiciatis tenetur molestiae distinctio
+        voluptatum reprehenderit vitae reiciendis.
+    </p>
+    <h2 class="heading-2 green">Заголовок 2</h2>
+    <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel natus quis esse illo, architecto voluptas
+        asperiores tempora modi perferendis deserunt excepturi at optio doloribus illum, sint dicta nam, harum
+        officiis?
+    </p>
+    <h2 class="heading-2">Заголовок 2</h2>
+    <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel natus quis esse illo, architecto voluptas
+        asperiores tempora modi perferendis deserunt excepturi at optio doloribus illum, sint dicta nam, harum
+        officiis?
+    </p>
+    <h3 class="heading-3">Заголовок 3</h3>
+    <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel natus quis esse illo, architecto voluptas
+        asperiores tempora modi perferendis deserunt excepturi at optio doloribus illum, sint dicta nam, harum
+        officiis?
+    </p>
+    <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel natus quis esse illo, architecto voluptas
+        asperiores tempora modi perferendis deserunt excepturi at optio doloribus illum, sint dicta nam, harum
+        officiis?
+    </p>
+</div>
+
+<!-- Работа с атрибутами. Прослушка событий. Изображение -->
+<div class="dom-example">
+    <div class="example-block">
+        <img id="logo" src="./img/js.png" alt="Логотип" /><br />
+        <input id="button" type="submit" value="Кнопка" />
     </div>
 </div>
 
-<div class="container">
-    <form action="/start" method="post">
-        <button type="submit" class="btn btn-primary mb-3">СТАРТ</button>
+<!-- Прослушка событий 2. Форма -->
+<div class="dom-example none">
+    <form action="">
+        <input type="text" class="input-text" id="input-text" />
+        <div class="text-block" id="text-block">...</div>
     </form>
-    <form action="/stop" method="post">
-        <button type="submit" class="btn btn-primary mb-3">СТОП</button>
+</div>
+
+<!-- Прослушка событий 3. event -->
+<div class="dom-example none">
+    <h2>Объект event</h2>
+    <h3>Список задач</h3>
+    <ul id="list">
+        <li>Посмотреть вебинар</li>
+        <li>Написать конспект</li>
+        <li>Повторить код с урока</li>
+    </ul>
+</div>
+
+<!-- Создание элементов -->
+<div class="dom-example none">
+    <h2>Создание и копирование элементов</h2>
+    <div id="elementsContainer"></div>
+</div>
+
+<!-- ToDo список задач -->
+<div class="simple-todo none">
+    <div class="tasks-wrapper">
+        <h2>Список задач</h2>
+        <ul id="todo-list">
+            <li>Посмотреть вебинар</li>
+            <li>Написать конспект</li>
+            <li>Повторить код с урока</li>
+        </ul>
+    </div>
+    <form id="todo-form">
+        <input id="todo-input" type="text" placeholder="Введите название задачи" />
+        <button type="submit">Добавить задачу</button>
     </form>
+</div>
+
+<!-- Таймер setInterval -->
+<div class="dom-example none">
+    <div class="counter" id="counter">0</div>
+    <button role="button" id="start">Старт</button>
+    <button role="button" id="pause">Пауза</button>
+    <button role="button" id="reset">Сброс</button>
+</div>
+
+<!-- Fetch example - курсы валют -->
+<div class="fetch-example none">
+    <h2>Курсы валют</h2>
+    <div class="currency-box">
+        <div class="currency-row" id="dollar">
+            <div class="currency-info">&#36;</div>
+            <span id="usd">76</span> рублей за доллар
+        </div>
+        <div class="currency-row" id="euro">
+            <div class="currency-info">&#8364;</div>
+            <span id="eur">76</span> рублей за евро
+        </div>
+    </div>
+
 </div>
 
 <script src="./main.js"></script>
-
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"-->
-<!--        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"-->
-<!--        crossorigin="anonymous"></script>-->
 </body>
 </html>

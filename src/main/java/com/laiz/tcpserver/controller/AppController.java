@@ -21,7 +21,7 @@ public class AppController {
 
     @GetMapping("/")
     public String getIndex() {
-        return "indexTest.html";
+        return "indexTCP.html";
     }
 
     @PostMapping("/start")
@@ -37,7 +37,6 @@ public class AppController {
     public void stopServer() {
         try {
             context.getBean(TcpServer.class).stop();
-            log.info("Server stopped");
         } catch (IOException e) {
             e.printStackTrace();
         }
