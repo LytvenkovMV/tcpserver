@@ -1,10 +1,8 @@
 package com.laiz.tcpserver.controller;
 
-import com.laiz.tcpserver.TcpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Slf4j
@@ -12,18 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class AppController {
 
-    @GetMapping("/")
+    @GetMapping
     public String getIndex() {
         return "indexTCP.html";
-    }
-
-    @PostMapping("/start")
-    public void startServer() {
-        ////////TcpServer.start();
-    }
-
-    @PostMapping("/stop")
-    public void stopServer() {
-        //////////////TcpServer.stop();
     }
 }

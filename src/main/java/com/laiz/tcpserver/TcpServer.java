@@ -22,66 +22,67 @@ public final class TcpServer {
     private static int length = 12;
 
     public static void start() {
-        startCmd = TcpServerCmd.ACTIVE;
+        log.info("Start command received");
+        if (serverState != TcpServerState.STARTED) startCmd = TcpServerCmd.ACTIVE;
     }
 
     public static void stop() {
-        stopCmd = TcpServerCmd.ACTIVE;
+        log.info("Stop command received");
+        if (serverState != TcpServerState.STOPPED) stopCmd = TcpServerCmd.ACTIVE;
     }
 
     public static void runThread() {
+
         while (true) {
-            switch (serverState) {
-                case STOPPED:
-                    if (startCmd == TcpServerCmd.ACTIVE) {
-                        try {
-                            server = new ServerSocket(port);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        serverState = TcpServerState.STARTED;
-                        startCmd = TcpServerCmd.NOT_ACTIVE;
-                        log.info("Server started. Waiting for the client connection...");
-                    }
-                    break;
 
-                case STARTED:
-                    if (stopCmd == TcpServerCmd.ACTIVE) {
-                        try {
-                            dataInputStream.close();
-                            dataOutputStream.close();
-                            socket.close();
-                            server.close();
-                            serverState = TcpServerState.STOPPED;
-                            stopCmd = TcpServerCmd.NOT_ACTIVE;
-                            log.info("Server stopped");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        try {
-                            socket = server.accept();
-                            log.info("Client connected. Waiting for message...");
-
-                            while (socket.isConnected()) {
-                                byte[] inputBytes = new byte[length];
-                                dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-                                for (int i = 0; i < length; i++) inputBytes[i] = dataInputStream.readByte();
-                                String messageContent = new String(inputBytes);
-                                log.info("Message received. Message content: " + messageContent);
-                                dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-                                dataOutputStream.writeBytes(" ===Server response: " + messageContent + "=== ");
-                                dataOutputStream.flush();
-                                log.info("Response sent. Waiting for new message...");
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    break;
+            if (startCmd == TcpServerCmd.ACTIVE) {
+                try {
+                    server = new ServerSocket(port);
+                    serverState = TcpServerState.STARTED;
+                    startCmd = TcpServerCmd.NOT_ACTIVE;
+                    log.info("Server started. Waiting for the client connection...");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
+            if (stopCmd == TcpServerCmd.ACTIVE) {
+                try {
+                    if (dataInputStream != null) dataInputStream.close();
+                    if (dataOutputStream != null) dataOutputStream.close();
+                    if (socket != null) socket.close();
+                    server.close();
+                    serverState = TcpServerState.STOPPED;
+                    stopCmd = TcpServerCmd.NOT_ACTIVE;
+                    log.info("Server stopped");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+//            if (serverState == TcpServerState.STARTED) {
+//                try {
+//                    if (socket == null) {
+//                        socket = server.accept();
+//                    } else {
+//                        log.info("Client connected. Waiting for message...");
+//                        byte[] inputBytes = new byte[length];
+//                        dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+//                        for (int i = 0; i < length; i++) inputBytes[i] = dataInputStream.readByte();
+//                        String messageContent = new String(inputBytes);
+//                        log.info("Message received. Message content: " + messageContent);
+//                        dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+//                        dataOutputStream.writeBytes(" ===Server response: " + messageContent + "=== ");
+//                        dataOutputStream.flush();
+//                        log.info("Response sent. Waiting for new message...");
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
     }
+}
 
 
 //    public static void start() throws IOException {
@@ -133,4 +134,4 @@ public final class TcpServer {
 //            }
 //        }
 //    }
-}
+
