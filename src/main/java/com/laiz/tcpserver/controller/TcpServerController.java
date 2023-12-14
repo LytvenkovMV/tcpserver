@@ -14,11 +14,13 @@ public class TcpServerController {
 
     @PostMapping
     public void startServer() {
+        log.info("Start command received");
         TcpServer.start();
     }
 
     @DeleteMapping
     public void stopServer() {
+        log.info("Stop command received");
         TcpServer.stop();
     }
 }

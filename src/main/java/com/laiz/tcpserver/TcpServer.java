@@ -22,12 +22,10 @@ public final class TcpServer {
     private static int length = 12;
 
     public static void start() {
-        log.info("Start command received");
         if (serverState != TcpServerState.STARTED) startCmd = TcpServerCmd.ACTIVE;
     }
 
     public static void stop() {
-        log.info("Stop command received");
         if (serverState != TcpServerState.STOPPED) stopCmd = TcpServerCmd.ACTIVE;
     }
 
