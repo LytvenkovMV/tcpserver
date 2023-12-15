@@ -13,6 +13,6 @@ public class AppController {
     @GetMapping
     public String getIndex() {
         log.info("Index requested");
-        return "indexTCP.html";
+        return "index.html";
     }
 }

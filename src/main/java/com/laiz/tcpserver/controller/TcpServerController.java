@@ -1,6 +1,6 @@
 package com.laiz.tcpserver.controller;
 
-import com.laiz.tcpserver.TcpServer;
+import com.laiz.tcpserver.server.TcpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
