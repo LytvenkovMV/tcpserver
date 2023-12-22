@@ -12,7 +12,7 @@ public class AppController {
 
     @GetMapping
     public String getIndex() {
-        log.info("Index requested");
+        log.info("Index page request");
         return "index.html";
     }
 }

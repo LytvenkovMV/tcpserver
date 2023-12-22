@@ -18,17 +18,52 @@
         <div class="col text-left">
             <div class="fs-5">ИНСТРУКЦИЯ</div>
             <div class="fs-6">
-                1. Для запуска TCP сервера нажмите кнопку старт.<br>
-                2. После запуска можно подключиться к серверу и отправить сообщение.<br>
-                3. Номер порта 2404.<br>
+                1. Запустить TCP сервер.<br>
+                2. Подключиться к TCP серверу по TCP/IP протоколу. Номер порта для подключения 2404.<br>
+                3. Отправить сообщение, состоящее из 10 символов.<br>
+                4. Если все работает правильно, сервер пришлет копию вашего сообщения.<br>
+                5. Для отправки сообщений на сервер можно использовать программу Putty (подключаться в режиме RAW).<br>
             </div>
         </div>
     </div>
 </div>
 
 <div class="container">
-    <input class="btn btn-primary mb-3" id="button-start" type="submit" value="СТАРТ" />
-    <input class="btn btn-primary mb-3" id="button-stop" type="submit" value="СТОП" />
+    <input class="btn btn-primary mb-3" id="button-start" type="submit" value="СТАРТ"/>
+    <input class="btn btn-primary mb-3" id="button-stop" type="submit" value="СТОП"/>
+    <input class="btn btn-primary mb-3" id="button-update" type="submit" value="ОБНОВИТЬ"/>
+</div>
+
+<div class="container">
+    <table class="table" id="output-table">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+        </tr>
+        <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>@fat</td>
+        </tr>
+        <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 
 <script src="./main.js"></script>
@@ -38,3 +73,4 @@
 <!--        crossorigin="anonymous"></script>-->
 </body>
 </html>
+
