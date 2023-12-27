@@ -16,8 +16,8 @@
 
     <div class="row-auto mt-3 mb-3">
         <div class="col text-left">
-            <div class="fs-5">ИНСТРУКЦИЯ</div>
-            <div class="fs-6">
+            <div class="h5">ИНСТРУКЦИЯ</div>
+            <div class="h6">
                 1. Запустить TCP сервер.<br>
                 2. Подключиться к TCP серверу по TCP/IP протоколу. Номер порта для подключения 2404.<br>
                 3. Отправить сообщение, состоящее из 10 символов.<br>
@@ -29,48 +29,25 @@
 </div>
 
 <div class="container">
-    <input class="btn btn-primary mb-3" id="button-start" type="submit" value="СТАРТ"/>
-    <input class="btn btn-primary mb-3" id="button-stop" type="submit" value="СТОП"/>
-    <input class="btn btn-primary mb-3" id="button-update" type="submit" value="ОБНОВИТЬ"/>
+    <input class="btn btn-primary mb-3" id="button-server-start" type="submit" value="СЕРВЕР СТАРТ"/>
+    <input class="btn btn-primary mb-3" id="button-server-stop" type="submit" value="СЕРВЕР СТОП"/>
 </div>
 
 <div class="container">
     <table class="table" id="output-table">
         <thead>
         <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">Время</th>
+            <th scope="col">Источник</th>
+            <th scope="col">Информация</th>
         </tr>
-        </thead>
         <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td colspan="2">Larry the Bird</td>
-            <td>@twitter</td>
-        </tr>
         </tbody>
+        </thead>
     </table>
 </div>
 
 <script src="./main.js"></script>
 
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"-->
-<!--        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"-->
-<!--        crossorigin="anonymous"></script>-->
 </body>
 </html>
-

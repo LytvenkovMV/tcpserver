@@ -1,14 +1,14 @@
-const buttonStart = document.querySelector('#button-start')
-const buttonStop = document.querySelector('#button-stop')
-const buttonUpdate = document.querySelector('#button-update')
+const buttonServerStart = document.querySelector('#button-server-start')
+const buttonServerStop = document.querySelector('#button-server-stop')
 const outputTable = document.querySelector('#output-table')
-let outputData
+let timerID
+let rowIndex = 0
 
-buttonStart.onclick = () => {
+
+buttonServerStart.onclick = () => {
     console.log('Start server request...')
     fetch('http://localhost:8080/tcp-server/start', {
-        method: "POST",
-        mode: "no-cors"
+        method: "POST"
     })
         .then(() => {
             console.log('Start server OK!')
@@ -19,11 +19,10 @@ buttonStart.onclick = () => {
 }
 
 
-buttonStop.onclick = () => {
+buttonServerStop.onclick = () => {
     console.log('Stop server request...')
     fetch('http://localhost:8080/tcp-server/stop', {
-        method: "POST",
-        mode: "no-cors"
+        method: "POST"
     })
         .then(() => {
             console.log('Stop server OK!')
@@ -34,60 +33,38 @@ buttonStop.onclick = () => {
 }
 
 
-/////////////const timerID = setInterval(getData, 1000)
-
-
-buttonUpdate.onclick = getData
-
-// async function getData() {
-//     console.log('TCP server output data request...')
-//     const response = await fetch('http://localhost:8080/tcp-server/output', {
-//         method: "GET",
-//         mode: "no-cors"
-//     })
-//     outputData = await response.json()
-//     console.info(outputData)
-// }
-
-
-// function getData() {
-//     console.log('TCP server output data request...')
-//     fetch('http://localhost:8080/tcp-server/output', {
-//         method: "GET",
-//         mode: "no-cors"
-//     })
-//         .then(response => {
-//             console.log('Output data received!')
-//             console.log(response)
-//             return response.json()
-//         })
-//         .then(response => {
-//             console.log('JSON received')
-//             console.log(response)
-//         })
-//         .catch(() => {
-//             console.log('Server NOT AVAIlABLE!')
-//         })
-// }
-
+timerID = setInterval(getData, 2000)
+console.log('Data receiving started!')
 
 
 function getData() {
     console.log('TCP server output data request...')
-    fetch('https://cbr-xml-daily.ru/daily_json.js', {
-        method: "GET",
-        mode: "no-cors"
-    })
+    fetch('http://localhost:8080/tcp-server/output')
         .then(response => {
-            console.log('Output data received!')
+            console.log('Server response received!')
             console.log(response)
             return response.json()
         })
-        .then(response => {
-            console.log('JSON received')
-            console.log(response)
+        .then(json => {
+            console.log('JSON is ready!')
+            console.log(json)
+            for (let item of json) {
+                showData(item.time, item.source, item.information)
+            }
         })
         .catch(() => {
-            console.log('Server NOT AVAIlABLE!')
+            console.log('Data NOT AVAIlABLE!')
         })
+}
+
+
+function showData(row1Data, row2Data, row3Data) {
+    rowIndex++
+    const row = outputTable.insertRow(rowIndex);
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+    const cell3 = row.insertCell(2);
+    cell1.innerText = row1Data;
+    cell2.innerText = row2Data;
+    cell3.innerText = row3Data;
 }

@@ -1,5 +1,6 @@
 package com.laiz.tcpserver.server;
 
+import com.laiz.tcpserver.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -25,17 +26,20 @@ public class TcpServerThread implements Runnable {
             try {
                 if (socket == null) {
                     socket = server.accept();
-                } else {
                     log.info("Client connected. Waiting for message...");
+                    MessageService.add("TCP thread", "Client connected. Waiting for message...");
+                } else {
                     byte[] inputBytes = new byte[length];
                     dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                     for (int i = 0; i < length; i++) inputBytes[i] = dataInputStream.readByte();
                     String messageContent = new String(inputBytes);
-                    log.info("AppMessage received. AppMessage content: " + messageContent);
+                    log.info("Message received. Message content: " + messageContent);
+                    MessageService.add("TCP thread", "Message received. Message content: " + messageContent);
                     dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                     dataOutputStream.writeBytes(" ===Server response: " + messageContent + "=== ");
                     dataOutputStream.flush();
                     log.info("Response sent. Waiting for new message...");
+                    MessageService.add("TCP thread", "Response sent. Waiting for new message...");
                 }
             } catch (IOException e) {
                 e.printStackTrace();

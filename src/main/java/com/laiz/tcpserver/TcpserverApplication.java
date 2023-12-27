@@ -1,6 +1,7 @@
 package com.laiz.tcpserver;
 
 import com.laiz.tcpserver.server.TcpServer;
+import com.laiz.tcpserver.service.MessageService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,8 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TcpserverApplication {
 
     public static void main(String[] args) {
-
         SpringApplication.run(TcpserverApplication.class, args);
+        MessageService.add("Application", "Started");
         TcpServer.handleCommands();
     }
 }

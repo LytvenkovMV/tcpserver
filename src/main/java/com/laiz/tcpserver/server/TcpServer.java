@@ -45,7 +45,7 @@ public final class TcpServer {
                     serverState = TcpServerState.STARTED;
                     startCmd = TcpServerCmd.NOT_ACTIVE;
                     log.info("Server started. Waiting for the client connection...");
-                    MessageService.add("TCP server", "Started");
+                    MessageService.add("TCP server", "Started. Waiting for the client connection...");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
