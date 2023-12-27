@@ -31,7 +31,7 @@ public class TcpServerThread implements Runnable {
                     dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                     for (int i = 0; i < length; i++) inputBytes[i] = dataInputStream.readByte();
                     String messageContent = new String(inputBytes);
-                    log.info("Message received. Message content: " + messageContent);
+                    log.info("AppMessage received. AppMessage content: " + messageContent);
                     dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                     dataOutputStream.writeBytes(" ===Server response: " + messageContent + "=== ");
                     dataOutputStream.flush();

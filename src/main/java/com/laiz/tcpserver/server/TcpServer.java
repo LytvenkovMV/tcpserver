@@ -2,6 +2,7 @@ package com.laiz.tcpserver.server;
 
 import com.laiz.tcpserver.enums.TcpServerCmd;
 import com.laiz.tcpserver.enums.TcpServerState;
+import com.laiz.tcpserver.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public final class TcpServer {
             if (startCmd == TcpServerCmd.ACTIVE) {
                 try {
                     log.info("Starting server...");
+                    MessageService.add("TCP server", "Starting...");
                     server = new ServerSocket(port);
 
                     executor = Executors.newFixedThreadPool(1);
@@ -43,6 +45,7 @@ public final class TcpServer {
                     serverState = TcpServerState.STARTED;
                     startCmd = TcpServerCmd.NOT_ACTIVE;
                     log.info("Server started. Waiting for the client connection...");
+                    MessageService.add("TCP server", "Started");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -51,11 +54,13 @@ public final class TcpServer {
             if (stopCmd == TcpServerCmd.ACTIVE) {
                 try {
                     log.info("Stopping server...");
+                    MessageService.add("TCP server", "Stopping...");
                     executor.shutdownNow();
                     server.close();
                     serverState = TcpServerState.STOPPED;
                     stopCmd = TcpServerCmd.NOT_ACTIVE;
                     log.info("Server stopped");
+                    MessageService.add("TCP server", "Stopped");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

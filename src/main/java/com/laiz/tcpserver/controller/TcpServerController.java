@@ -1,28 +1,23 @@
 package com.laiz.tcpserver.controller;
 
-import com.laiz.tcpserver.dto.GetOutputDataRequestDto;
+import com.laiz.tcpserver.dao.AppMessage;
+import com.laiz.tcpserver.service.MessageService;
 import com.laiz.tcpserver.server.TcpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalTime;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/tcp-server")
+@CrossOrigin(origins = "*")
 public class TcpServerController {
 
     @GetMapping("/output")
-    public GetOutputDataRequestDto getOutputData() {
-        log.info("Get output data request");
-
-        GetOutputDataRequestDto dto = new GetOutputDataRequestDto();
-        LocalTime localTime = java.time.LocalTime.now();
-        dto.setTime(localTime.toSecondOfDay());
-        dto.setSource("TCP server");
-        dto.setMessage("Hello from server!!!!!!!!");
-
-        return dto;
+    public List<AppMessage> getOutputData() {
+        log.info("Output data request");
+        return MessageService.give();
     }
 
     @PostMapping("/start")

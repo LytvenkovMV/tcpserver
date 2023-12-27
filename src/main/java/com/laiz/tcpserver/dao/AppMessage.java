@@ -1,4 +1,4 @@
-package com.laiz.tcpserver.dto;
+package com.laiz.tcpserver.dao;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetOutputDataRequestDto {
+public class AppMessage {
 
     private Integer time;
     private String source;
-    private String message;
+    private String information;
 }
