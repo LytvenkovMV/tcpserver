@@ -35,7 +35,7 @@ public final class TcpServer {
             if (startCmd == TcpServerCmd.ACTIVE) {
                 try {
                     log.info("Starting server...");
-                    MessageService.add("TCP server", "Starting...");
+                    MessageService.add("TCP сервер", "Запускается...");
                     server = new ServerSocket(port);
 
                     executor = Executors.newFixedThreadPool(1);
@@ -45,7 +45,7 @@ public final class TcpServer {
                     serverState = TcpServerState.STARTED;
                     startCmd = TcpServerCmd.NOT_ACTIVE;
                     log.info("Server started. Waiting for the client connection...");
-                    MessageService.add("TCP server", "Started. Waiting for the client connection...");
+                    MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -54,13 +54,13 @@ public final class TcpServer {
             if (stopCmd == TcpServerCmd.ACTIVE) {
                 try {
                     log.info("Stopping server...");
-                    MessageService.add("TCP server", "Stopping...");
+                    MessageService.add("TCP сервер", "Останавливается...");
                     executor.shutdownNow();
                     server.close();
                     serverState = TcpServerState.STOPPED;
                     stopCmd = TcpServerCmd.NOT_ACTIVE;
                     log.info("Server stopped");
-                    MessageService.add("TCP server", "Stopped");
+                    MessageService.add("TCP сервер", "Остановлен");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

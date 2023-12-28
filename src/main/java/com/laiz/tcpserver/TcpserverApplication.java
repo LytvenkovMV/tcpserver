@@ -10,7 +10,6 @@ public class TcpserverApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TcpserverApplication.class, args);
-        MessageService.add("Application", "Started");
         TcpServer.handleCommands();
     }
 }

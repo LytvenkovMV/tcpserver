@@ -17,7 +17,9 @@ public class TcpServerController {
     @GetMapping("/output")
     public List<AppMessage> getOutputData() {
         log.info("Output data request");
-        return MessageService.give();
+        List<AppMessage> appMessages = MessageService.give();
+        log.info(appMessages.size() + " new messages sent");
+        return appMessages;
     }
 
     @PostMapping("/start")
