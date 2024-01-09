@@ -1,13 +1,18 @@
+const ip1 = "127.0.0.1"
+const ip2 = "95.163.185.81"
+
+const serverIp = ip2
+
 const buttonServerStart = document.querySelector('#button-server-start')
 const buttonServerStop = document.querySelector('#button-server-stop')
 const outputTable = document.querySelector('#output-table')
-let timerID
+let timerID = null
 let rowIndex = 0
 
 
 buttonServerStart.onclick = () => {
     console.log('Start server request...')
-    fetch('http://localhost:8080/tcp-server/start', {
+    fetch(`http://${serverIp}:8080/tcp-server/start`, {
         method: "POST"
     })
         .then(() => {
@@ -21,7 +26,7 @@ buttonServerStart.onclick = () => {
 
 buttonServerStop.onclick = () => {
     console.log('Stop server request...')
-    fetch('http://localhost:8080/tcp-server/stop', {
+    fetch(`http://${serverIp}:8080/tcp-server/stop`, {
         method: "POST"
     })
         .then(() => {
@@ -39,7 +44,7 @@ console.log('Data receiving started!')
 
 function getData() {
     console.log('TCP server output data request...')
-    fetch('http://localhost:8080/tcp-server/output')
+    fetch(`http://${serverIp}:8080/tcp-server/output`)
         .then(response => {
             console.log('Server response received!')
             console.log(response)

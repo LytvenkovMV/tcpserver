@@ -7,7 +7,7 @@
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
 <body>
-<div class="container">
+<div class="container-fluid">
     <div class="row align-items-center">
         <div class="col fs-2 text-center text-bg-primary p-3" style="font-family: 'Verdana'">
             TCPSERVER-0.0.1
@@ -18,23 +18,20 @@
         <div class="col text-left">
             <div class="h5">ИНСТРУКЦИЯ</div>
             <div class="h6">
-                1. Запустить TCP сервер.<br>
-                2. Подключиться к TCP серверу по TCP/IP протоколу с помощью программы Putty. В Putty выбрать тип подключения "RAW", ввести IP адрес<br>
-                   компьютера, на котором работает программа TCPSERVER, ввести номер порта 2404.<br>
-                3. Отправить сообщение, состоящее из 10 символов.<br>
-                4. Если все работает правильно, сервер пришлет копию вашего сообщения.<br>
-                5. Остановить TCP сервер.<br>
+                1. Открыть браузер. В строке адреса набрать адрес: http://95.163.185.81:8080<br>
+                2. В открывшемся интерфейсе запустить TCP сервер кнопкой "СТАРТ".<br>
+                3. Открыть программу Putty. Выбрать тип подключения "RAW", ввести IP адрес 95.163.185.81, ввести номер
+                порта 2404 и установить соединение.<br>
+                4. Отправить сообщение, состоящее из 10 символов.<br>
+                5. Если все работает правильно, сервер пришлет копию вашего сообщения.<br>
+                6. Остановить TCP сервер кнопкой "СТОП".<br>
             </div>
         </div>
     </div>
-</div>
 
-<div class="container">
     <input class="btn btn-primary mb-3" id="button-server-start" type="submit" value="СЕРВЕР СТАРТ"/>
     <input class="btn btn-primary mb-3" id="button-server-stop" type="submit" value="СЕРВЕР СТОП"/>
-</div>
 
-<div class="container">
     <table class="table table-dark table-sm table-borderless" id="output-table">
         <thead>
         <tr>
@@ -42,8 +39,6 @@
             <th scope="col">Источник</th>
             <th scope="col">Информация</th>
         </tr>
-        <tbody>
-        </tbody>
         </thead>
     </table>
 </div>
