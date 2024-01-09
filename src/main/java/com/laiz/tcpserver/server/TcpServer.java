@@ -11,34 +11,41 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public final class TcpServer {
+public final class TcpServer implements Runnable {
 
     private static ServerSocket server;
     private static ExecutorService executor;
     private static TcpServerState serverState = TcpServerState.STOPPED;
     private static TcpServerCmd startCmd = TcpServerCmd.NOT_ACTIVE;
     private static TcpServerCmd stopCmd = TcpServerCmd.NOT_ACTIVE;
-    private static int port = 2404;
+    private static final int port = 2404;
 
     public static void start() {
-        if (serverState != TcpServerState.STARTED) startCmd = TcpServerCmd.ACTIVE;
+        if (serverState != TcpServerState.STARTED) {
+            startCmd = TcpServerCmd.ACTIVE;
+            log.info("Starting server...");
+            MessageService.add("TCP сервер", "Запускается...");
+        }
     }
 
     public static void stop() {
-        if (serverState != TcpServerState.STOPPED) stopCmd = TcpServerCmd.ACTIVE;
+        if (serverState != TcpServerState.STOPPED) {
+            log.info("Stopping server...");
+            MessageService.add("TCP сервер", "Останавливается...");
+            stopCmd = TcpServerCmd.ACTIVE;
+        }
     }
 
-    public static void handleCommands() {
+    @Override
+    public void run() {
 
         while (true) {
 
             if (startCmd == TcpServerCmd.ACTIVE) {
                 try {
-                    log.info("Starting server...");
-                    MessageService.add("TCP сервер", "Запускается...");
                     server = new ServerSocket(port);
 
-                    executor = Executors.newFixedThreadPool(1);
+                    executor = Executors.newSingleThreadExecutor();
                     executor.execute(new TcpServerThread(server));
                     executor.shutdown();
 
@@ -53,8 +60,6 @@ public final class TcpServer {
 
             if (stopCmd == TcpServerCmd.ACTIVE) {
                 try {
-                    log.info("Stopping server...");
-                    MessageService.add("TCP сервер", "Останавливается...");
                     executor.shutdownNow();
                     server.close();
                     serverState = TcpServerState.STOPPED;
@@ -64,6 +69,12 @@ public final class TcpServer {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }

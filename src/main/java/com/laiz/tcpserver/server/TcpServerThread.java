@@ -12,17 +12,16 @@ public class TcpServerThread implements Runnable {
 
     private static ServerSocket server;
     private Socket socket;
-    private DataInputStream dataInputStream;
-    private DataOutputStream dataOutputStream;
-    private static int length = 12;
+    private static final int length = 12;
 
     public TcpServerThread(ServerSocket server) {
-        this.server = server;
+        TcpServerThread.server = server;
     }
 
     @Override
     public void run() {
         while (true) {
+
             try {
                 if (socket == null) {
                     socket = server.accept();
@@ -30,12 +29,12 @@ public class TcpServerThread implements Runnable {
                     MessageService.add("Процесс обмена по TCP", "Клиент подключен. Сервер ждет сообщение...");
                 } else {
                     byte[] inputBytes = new byte[length];
-                    dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                    DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                     for (int i = 0; i < length; i++) inputBytes[i] = dataInputStream.readByte();
                     String messageContent = new String(inputBytes);
                     log.info("Message received. Message content: " + messageContent);
                     MessageService.add("Процесс обмена по TCP", "Сообщение получено. Его содержание: " + messageContent);
-                    dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+                    DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                     dataOutputStream.writeBytes(" === Server response: " + messageContent + " === ");
                     dataOutputStream.flush();
                     log.info("Response sent. Waiting for new message...");
@@ -44,6 +43,12 @@ public class TcpServerThread implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
     }

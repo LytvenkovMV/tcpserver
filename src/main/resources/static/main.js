@@ -38,7 +38,7 @@ buttonServerStop.onclick = () => {
 }
 
 
-timerID = setInterval(getData, 2000)
+timerID = setInterval(getData, 2500)
 console.log('Data receiving started!')
 
 
