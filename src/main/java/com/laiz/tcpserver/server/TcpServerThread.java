@@ -12,7 +12,7 @@ public class TcpServerThread implements Runnable {
 
     private static ServerSocket server;
     private Socket socket;
-    private static final int length = 12;
+    private final int length = 12;
 
     public TcpServerThread(ServerSocket server) {
         TcpServerThread.server = server;
@@ -20,8 +20,8 @@ public class TcpServerThread implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
 
+        while (true) {
             try {
                 if (socket == null) {
                     socket = server.accept();
@@ -43,12 +43,6 @@ public class TcpServerThread implements Runnable {
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
-            }
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
         }
     }

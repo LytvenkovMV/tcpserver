@@ -4,6 +4,8 @@ import com.laiz.tcpserver.enums.TcpServerCmd;
 import com.laiz.tcpserver.enums.TcpServerState;
 import com.laiz.tcpserver.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,7 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-public final class TcpServer implements Runnable {
+@Component
+public final class TcpServer {
 
     private static ServerSocket server;
     private static ExecutorService executor;
@@ -36,45 +39,35 @@ public final class TcpServer implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-
-        while (true) {
-
-            if (startCmd == TcpServerCmd.ACTIVE) {
-                try {
-                    server = new ServerSocket(port);
-
-                    executor = Executors.newSingleThreadExecutor();
-                    executor.execute(new TcpServerThread(server));
-                    executor.shutdown();
-
-                    serverState = TcpServerState.STARTED;
-                    startCmd = TcpServerCmd.NOT_ACTIVE;
-                    log.info("Server started. Waiting for the client connection...");
-                    MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            if (stopCmd == TcpServerCmd.ACTIVE) {
-                try {
-                    executor.shutdownNow();
-                    server.close();
-                    serverState = TcpServerState.STOPPED;
-                    stopCmd = TcpServerCmd.NOT_ACTIVE;
-                    log.info("Server stopped");
-                    MessageService.add("TCP сервер", "Остановлен");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+    @Scheduled(fixedDelay = 100)
+    public static void run() {
+        if (startCmd == TcpServerCmd.ACTIVE) {
             try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                server = new ServerSocket(port);
+
+                executor = Executors.newSingleThreadExecutor();
+                executor.execute(new TcpServerThread(server));
+                executor.shutdown();
+
+                serverState = TcpServerState.STARTED;
+                startCmd = TcpServerCmd.NOT_ACTIVE;
+                log.info("Server started. Waiting for the client connection...");
+                MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (stopCmd == TcpServerCmd.ACTIVE) {
+            try {
+                executor.shutdownNow();
+                server.close();
+                serverState = TcpServerState.STOPPED;
+                stopCmd = TcpServerCmd.NOT_ACTIVE;
+                log.info("Server stopped");
+                MessageService.add("TCP сервер", "Остановлен");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

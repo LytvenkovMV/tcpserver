@@ -1,17 +1,39 @@
-const ip1 = "127.0.0.1"
-const ip2 = "95.163.185.81"
-
-const serverIp = ip2
-
-const buttonServerStart = document.querySelector('#button-server-start')
-const buttonServerStop = document.querySelector('#button-server-stop')
+const buttonClearForm = document.querySelector('#button-clear-form')
+const buttonDefaultFormValues = document.querySelector('#button-default-form-values')
+const buttonStartServer = document.querySelector('#button-start-server')
+const buttonStopServer = document.querySelector('#button-stop-server')
+const buttonClearLog = document.querySelector('#button-clear-log')
+const inputIpByte3 = document.querySelector('#input-ip-byte3')
+const inputIpByte2 = document.querySelector('#input-ip-byte2')
+const inputIpByte1 = document.querySelector('#input-ip-byte1')
+const inputIpByte0 = document.querySelector('#input-ip-byte0')
 const outputTable = document.querySelector('#output-table')
-let timerID = null
+let timerID
 let rowIndex = 0
 
 
-buttonServerStart.onclick = () => {
-    console.log('Start server request...')
+buttonClearForm.onclick = () => {
+    inputIpByte3.value = null
+    inputIpByte2.value = null
+    inputIpByte1.value = null
+    inputIpByte0.value = null
+    console.log('Form cleared!')
+}
+
+
+buttonDefaultFormValues.onclick = () => {
+    inputIpByte3.value = 127
+    inputIpByte2.value = 0
+    inputIpByte1.value = 0
+    inputIpByte0.value = 1
+    console.log('Form loaded by default values!')
+}
+
+
+buttonStartServer.onclick = () => {
+    toggleButtons()
+    const serverIp = getIp()
+    console.log(`Start server request at ${serverIp} address...`)
     fetch(`http://${serverIp}:8080/tcp-server/start`, {
         method: "POST"
     })
@@ -24,8 +46,10 @@ buttonServerStart.onclick = () => {
 }
 
 
-buttonServerStop.onclick = () => {
-    console.log('Stop server request...')
+buttonStopServer.onclick = () => {
+    toggleButtons()
+    const serverIp = getIp()
+    console.log(`Stop server request at ${serverIp} address...`)
     fetch(`http://${serverIp}:8080/tcp-server/stop`, {
         method: "POST"
     })
@@ -38,12 +62,22 @@ buttonServerStop.onclick = () => {
 }
 
 
+buttonClearLog.onclick = () => {
+    while (rowIndex > 0) {
+        outputTable.deleteRow(rowIndex);
+        rowIndex--
+    }
+    console.log('Log cleared!')
+}
+
+
 timerID = setInterval(getData, 2500)
 console.log('Data receiving started!')
 
 
 function getData() {
-    console.log('TCP server output data request...')
+    const serverIp = getIp()
+    console.log(`TCP server output data request at ${serverIp} address...`)
     fetch(`http://${serverIp}:8080/tcp-server/output`)
         .then(response => {
             console.log('Server response received!')
@@ -72,4 +106,20 @@ function showData(row1Data, row2Data, row3Data) {
     cell1.innerText = row1Data;
     cell2.innerText = row2Data;
     cell3.innerText = row3Data;
+}
+
+
+function toggleButtons() {
+    buttonStartServer.classList.toggle("disabled")
+    buttonStopServer.classList.toggle("disabled")
+}
+
+
+function getIp() {
+    const ip3 = inputIpByte3.value
+    const ip2 = inputIpByte2.value
+    const ip1 = inputIpByte1.value
+    const ip0 = inputIpByte0.value
+    const ip = `${ip3}.${ip2}.${ip1}.${ip0}`
+    return ip
 }

@@ -14,33 +14,73 @@
         </div>
     </div>
 
-    <div class="row-auto mt-3 mb-3">
-        <div class="col text-left">
-            <div class="h5">ИНСТРУКЦИЯ</div>
-            <div class="h6">
-                1. Открыть браузер. В строке адреса набрать адрес: http://95.163.185.81:8080<br>
-                2. В открывшемся интерфейсе запустить TCP сервер кнопкой "СТАРТ".<br>
-                3. Открыть программу Putty. Выбрать тип подключения "RAW", ввести IP адрес 95.163.185.81, ввести номер
-                порта 2404 и установить соединение.<br>
-                4. Отправить сообщение, состоящее из 10 символов.<br>
-                5. Если все работает правильно, сервер пришлет копию вашего сообщения.<br>
-                6. Остановить TCP сервер кнопкой "СТОП".<br>
+    <div class="row mt-3">
+        <div class="col-auto ms-4 h5">ИНСТРУКЦИЯ</div>
+    </div>
+
+    <div class="row">
+        <div class="col-auto h6">
+            <ol>
+                <li>Открыть браузер. В строке адреса набрать адрес http://***.***.***.***:8080,
+                    где ***.***.***.*** это IP адрес сервера.
+                </li>
+                <li>В открывшейся вкладке в поле "IP АДРЕС" ввести IP адрес сервера.</li>
+                <li>Запустить сервер кнопкой "СТАРТ".</li>
+                <li>Открыть программу Putty. Выбрать тип подключения "RAW", ввести IP адрес сервера, ввести номер
+                    порта 2404 и установить соединение.
+                </li>
+                <li>Отправить на сервер сообщение, состоящее из 10 символов.</li>
+                <li>Если все работает правильно, сервер пришлет копию вашего сообщения.</li>
+                <li>Остановить сервер кнопкой "СТОП".</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="row justify-content-start mb-3">
+        <div class="col-auto">
+            <div class="input-group">
+                <span class="input-group-text fs-5 fw-bold">IP АДРЕС:</span>
+                <input type="number" class="form-control text-end" id="input-ip-byte3" min="0" max="255" required
+                       minlength="1" maxlength="3" aria-label="Байт 3">
+                <span class="input-group-text fs-5 fw-bold">.</span>
+                <input type="number" class="form-control text-end" id="input-ip-byte2" min="0" max="255" required
+                       minlength="1" maxlength="3" aria-label="Байт 2">
+                <span class="input-group-text fs-5 fw-bold">.</span>
+                <input type="number" class="form-control text-end" id="input-ip-byte1" min="0" max="255" required
+                       minlength="1" maxlength="3" aria-label="Байт 1">
+                <span class="input-group-text fs-5 fw-bold">.</span>
+                <input type="number" class="form-control text-end" id="input-ip-byte0" min="0" max="255" required
+                       minlength="1" maxlength="3" aria-label="Байт 0">
+                <button type="button" class="btn btn-outline-secondary" id="button-clear-form">СБРОС</button>
+                <button type="button" class="btn btn-outline-secondary" id="button-default-form-values">ДЕФОЛТНЫЙ
+                </button>
             </div>
         </div>
     </div>
 
-    <input class="btn btn-primary mb-3" id="button-server-start" type="submit" value="СЕРВЕР СТАРТ"/>
-    <input class="btn btn-primary mb-3" id="button-server-stop" type="submit" value="СЕРВЕР СТОП"/>
+    <div class="row justify-content-between mb-3">
+        <div class="col-4 btn-group">
+            <button type="button" class="btn btn-primary fw-bold" id="button-start-server">СТАРТ</button>
+            <button type="button" class="btn btn-primary fw-bold disabled" id="button-stop-server">СТОП</button>
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-primary fw-bold" id="button-clear-log">ОЧИСТИТЬ ЖУРНАЛ</button>
+        </div>
+    </div>
 
-    <table class="table table-dark table-sm table-borderless" id="output-table">
-        <thead>
-        <tr>
-            <th scope="col">Время</th>
-            <th scope="col">Источник</th>
-            <th scope="col">Информация</th>
-        </tr>
-        </thead>
-    </table>
+    <div class="row">
+        <div class="col">
+            <table class="table table-dark table-sm table-borderless" id="output-table">
+                <thead>
+                <tr>
+                    <th scope="col">Время</th>
+                    <th scope="col">Источник</th>
+                    <th scope="col">Информация</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script src="./main.js"></script>
