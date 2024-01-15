@@ -3,21 +3,24 @@ package com.laiz.tcpserver.server;
 import com.laiz.tcpserver.enums.TcpServerCmd;
 import com.laiz.tcpserver.enums.TcpServerState;
 import com.laiz.tcpserver.service.MessageService;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Component
 public final class TcpServer {
 
+    @Autowired
+    private TcpServerThread tcpServerThread;
+
     private static ServerSocket server;
-    private static ExecutorService executor;
     private static TcpServerState serverState = TcpServerState.STOPPED;
     private static TcpServerCmd startCmd = TcpServerCmd.NOT_ACTIVE;
     private static TcpServerCmd stopCmd = TcpServerCmd.NOT_ACTIVE;
@@ -39,16 +42,17 @@ public final class TcpServer {
         }
     }
 
+    public static ServerSocket getServer() {
+        return server;
+    }
+
     @Scheduled(fixedDelay = 100)
-    public static void run() {
+    public void handleCommands() {
         if (startCmd == TcpServerCmd.ACTIVE) {
             try {
                 server = new ServerSocket(port);
-
-                executor = Executors.newSingleThreadExecutor();
-                executor.execute(new TcpServerThread(server));
-                executor.shutdown();
-
+                tcpServerThread.setIsRunning(true);
+                tcpServerThread.run();
                 serverState = TcpServerState.STARTED;
                 startCmd = TcpServerCmd.NOT_ACTIVE;
                 log.info("Server started. Waiting for the client connection...");
@@ -60,7 +64,7 @@ public final class TcpServer {
 
         if (stopCmd == TcpServerCmd.ACTIVE) {
             try {
-                executor.shutdownNow();
+                tcpServerThread.setIsRunning(false);
                 server.close();
                 serverState = TcpServerState.STOPPED;
                 stopCmd = TcpServerCmd.NOT_ACTIVE;
