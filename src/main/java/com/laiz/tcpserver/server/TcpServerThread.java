@@ -1,13 +1,13 @@
 package com.laiz.tcpserver.server;
 
+import com.laiz.tcpserver.enums.stateEnum;
 import com.laiz.tcpserver.service.MessageService;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,27 +17,27 @@ import java.util.List;
 @Component
 public class TcpServerThread {
 
-    @Autowired
-    private TcpServer tcpServer;
+    private static stateEnum threadState = stateEnum.STOPPED;
 
-    private Socket socket;
-    private static boolean isRunning = false;
-
-    public static void setIsRunning(boolean isRunning) {
-        TcpServerThread.isRunning = isRunning;
+    public static void setThreadState(stateEnum threadState) {
+        TcpServerThread.threadState = threadState;
     }
 
     @Async
-    public void run() {
+    public void run(ServerSocket server) {
 
-        while (isRunning) {
+        Socket socket = null;
+        DataInputStream dataInputStream = null;
+        DataOutputStream dataOutputStream = null;
+
+        while (threadState == stateEnum.STARTED) {
             try {
                 if (socket == null) {
-                    socket = tcpServer.getServer().accept();
+                    socket = server.accept();
                     log.info("Client connected. Waiting for message...");
                     MessageService.add("Процесс обмена по TCP", "Клиент подключен. Сервер ждет сообщение...");
                 } else {
-                    DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                    dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                     List<Byte> inputBytesList = new ArrayList<>();
                     for (int i = 0; i < 1000; i++) {
                         byte inputByte = dataInputStream.readByte();
@@ -53,7 +53,7 @@ public class TcpServerThread {
                     log.info("Message received. Message content: " + messageContent);
                     MessageService.add("Процесс обмена по TCP", "Сообщение получено. Его содержание: " + messageContent);
 
-                    DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+                    dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                     dataOutputStream.writeBytes(" === Server response: " + messageContent + " === ");
                     dataOutputStream.write(13);
                     dataOutputStream.write(10);
@@ -64,11 +64,27 @@ public class TcpServerThread {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
+                break;
             }
         }
 
-        return;
+        try {
+            if (dataInputStream != null) dataInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (dataOutputStream != null) dataOutputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

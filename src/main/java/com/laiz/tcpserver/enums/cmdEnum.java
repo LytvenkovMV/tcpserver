@@ -1,6 +1,6 @@
 package com.laiz.tcpserver.enums;
 
-public enum TcpServerCmd {
+public enum cmdEnum {
     NOT_ACTIVE,
     ACTIVE
 }

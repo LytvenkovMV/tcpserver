@@ -1,6 +1,6 @@
 package com.laiz.tcpserver.enums;
 
-public enum TcpServerState {
+public enum stateEnum {
     STOPPED,
     STARTED
 }
