@@ -4,7 +4,6 @@ import com.laiz.tcpserver.enums.cmdEnum;
 import com.laiz.tcpserver.enums.stateEnum;
 import com.laiz.tcpserver.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +14,16 @@ import java.net.ServerSocket;
 @Component
 public class TcpServer {
 
-    @Autowired
-    TcpServerThread tcpServerThread;
-
+    private static TcpServerThread tcpServerThread;
     private static ServerSocket server;
     private static stateEnum serverState = stateEnum.STOPPED;
     private static cmdEnum startCmd = cmdEnum.NOT_ACTIVE;
     private static cmdEnum stopCmd = cmdEnum.NOT_ACTIVE;
     private static final int port = 2404;
+
+    public TcpServer(TcpServerThread thread) {
+        this.tcpServerThread = thread;
+    }
 
     public static void start() {
         if (serverState != stateEnum.STARTED) {
