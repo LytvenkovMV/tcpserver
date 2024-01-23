@@ -22,7 +22,7 @@ public class TcpServer {
     private static final int port = 2404;
 
     public TcpServer(TcpServerThread thread) {
-        this.tcpServerThread = thread;
+        tcpServerThread = thread;
     }
 
     public static void start() {
@@ -46,7 +46,7 @@ public class TcpServer {
         if (startCmd == cmdEnum.ACTIVE) {
             try {
                 server = new ServerSocket(port);
-                tcpServerThread.setThreadState(stateEnum.STARTED);
+                TcpServerThread.setThreadState(stateEnum.STARTED);
                 tcpServerThread.run(server);
                 serverState = stateEnum.STARTED;
                 startCmd = cmdEnum.NOT_ACTIVE;
@@ -59,7 +59,7 @@ public class TcpServer {
 
         if (stopCmd == cmdEnum.ACTIVE) {
             try {
-                tcpServerThread.setThreadState(stateEnum.STOPPED);
+                TcpServerThread.setThreadState(stateEnum.STOPPED);
                 server.close();
                 serverState = stateEnum.STOPPED;
                 stopCmd = cmdEnum.NOT_ACTIVE;

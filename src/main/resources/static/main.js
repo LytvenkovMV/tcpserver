@@ -120,6 +120,5 @@ function getIp() {
     const ip2 = inputIpByte2.value
     const ip1 = inputIpByte1.value
     const ip0 = inputIpByte0.value
-    const ip = `${ip3}.${ip2}.${ip1}.${ip0}`
-    return ip
+    return `${ip3}.${ip2}.${ip1}.${ip0}`
 }

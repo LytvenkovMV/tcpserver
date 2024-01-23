@@ -11,7 +11,7 @@ public class MessageService {
 
     private static int numberOfMessages = 0;
     private static int indexOfLastGiven = 0;
-    private static List<AppMessage> appMessages = new ArrayList<>();
+    private static final List<AppMessage> appMessages = new ArrayList<>();
 
     public static void add(String source, String information) {
         LocalTime localTime = java.time.LocalTime.now();
