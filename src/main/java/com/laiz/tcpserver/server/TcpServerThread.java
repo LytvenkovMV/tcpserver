@@ -11,6 +11,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -38,17 +39,18 @@ public class TcpServerThread {
                     MessageService.add("Процесс обмена по TCP", "Клиент подключен. Сервер ждет сообщение...");
                 } else {
                     dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-                    List<Byte> inputBytesList = new ArrayList<>();
+                    int messageLength = 0;
+                    byte[] inputBytes = new byte[1000];
                     for (int i = 0; i < 1000; i++) {
                         byte inputByte = dataInputStream.readByte();
-                        if (inputByte == 13) break;
-                        else inputBytesList.add(inputByte);
+                        if (inputByte == 13) {
+                            messageLength = i;
+                            break;
+                        }
+                        else inputBytes[i] = inputByte;
                     }
-
-                    int messageLength = inputBytesList.size();
-                    byte[] byteArray = new byte[messageLength];
-                    for (int i = 0; i < messageLength; i++) byteArray[i] = inputBytesList.get(i);
-                    String messageContent = new String(byteArray, StandardCharsets.UTF_8);
+                    byte[] message = Arrays.copyOf(inputBytes, messageLength);
+                    String messageContent = new String(message, StandardCharsets.UTF_8);
 
                     log.info("Message received. Message content: " + messageContent);
                     MessageService.add("Процесс обмена по TCP", "Сообщение получено. Его содержание: " + messageContent);
