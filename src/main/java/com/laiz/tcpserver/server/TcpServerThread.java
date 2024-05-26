@@ -1,6 +1,7 @@
 package com.laiz.tcpserver.server;
 
-import com.laiz.tcpserver.enums.stateEnum;
+import com.laiz.tcpserver.enums.MessageTypeEnum;
+import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -10,18 +11,27 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Component
 public class TcpServerThread {
 
-    private static stateEnum threadState = stateEnum.STOPPED;
+    private static StateEnum threadState;
+    private static MessageTypeEnum messageType;
 
-    public static void setThreadState(stateEnum threadState) {
+    private static byte endByte;
+
+    public static void setThreadState(StateEnum threadState) {
         TcpServerThread.threadState = threadState;
+    }
+
+    public static void setMessageType(MessageTypeEnum messageType) {
+        TcpServerThread.messageType = messageType;
+    }
+
+    public static void setEndByte(byte endByte) {
+        TcpServerThread.endByte = endByte;
     }
 
     @Async
@@ -31,7 +41,7 @@ public class TcpServerThread {
         DataInputStream dataInputStream = null;
         DataOutputStream dataOutputStream = null;
 
-        while (threadState == stateEnum.STARTED) {
+        while (threadState == StateEnum.STARTED) {
             try {
                 if (socket == null) {
                     socket = server.accept();
@@ -43,22 +53,34 @@ public class TcpServerThread {
                     byte[] inputBytes = new byte[1000];
                     for (int i = 0; i < 1000; i++) {
                         byte inputByte = dataInputStream.readByte();
-                        if (inputByte == 13) {
-                            messageLength = i;
+                        inputBytes[i] = inputByte;
+                        if (inputByte == endByte) {
+                            messageLength = i + 1;
                             break;
                         }
-                        else inputBytes[i] = inputByte;
                     }
                     byte[] message = Arrays.copyOf(inputBytes, messageLength);
-                    String messageContent = new String(message, StandardCharsets.UTF_8);
+
+                    String messageContent = "";
+                    switch (messageType) {
+                        case BYTES:
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (byte messageByte : message) {
+                                stringBuilder.append(Integer.toString(messageByte, 16));
+                            }
+                            messageContent = stringBuilder.toString();
+                            break;
+                        case STRING:
+                            messageContent = new String(message, StandardCharsets.UTF_8);
+                    }
 
                     log.info("Message received. Message content: " + messageContent);
                     MessageService.add("Процесс обмена по TCP", "Сообщение получено. Его содержание: " + messageContent);
 
                     dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-                    dataOutputStream.writeBytes(" === Server response: " + messageContent + " === ");
-                    dataOutputStream.write(13);
-                    dataOutputStream.write(10);
+                    dataOutputStream.write(message);
+//                    dataOutputStream.write(13);
+//                    dataOutputStream.write(10);
                     dataOutputStream.flush();
 
                     log.info("Response sent. Waiting for new message...");

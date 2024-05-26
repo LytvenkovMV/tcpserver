@@ -51,9 +51,17 @@
                 <span class="input-group-text fs-5 fw-bold">.</span>
                 <input type="number" class="form-control text-end" id="input-ip-byte0" min="0" max="255" required
                        minlength="1" maxlength="3" aria-label="Байт 0">
-                <button type="button" class="btn btn-outline-secondary" id="button-clear-form">СБРОС</button>
-                <button type="button" class="btn btn-outline-secondary" id="button-default-form-values">ДЕФОЛТНЫЙ
+                <button type="button" class="btn btn-outline-secondary" id="button-clear-ip">СБРОС</button>
+                <button type="button" class="btn btn-outline-secondary" id="button-default-ip">ДЕФОЛТНЫЙ
                 </button>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="input-group">
+                <span class="input-group-text fs-5 fw-bold">EOFM БАЙТ:</span>
+                <input type="number" class="form-control text-end" id="end-of-message-byte" min="0" max="255" required
+                       minlength="1" maxlength="3" aria-label="Байт конца сообщения">
+                <button type="button" class="btn btn-outline-secondary" id="button-clear-end-of-message">СБРОС</button>
             </div>
         </div>
     </div>
@@ -63,6 +71,14 @@
             <button type="button" class="btn btn-primary fw-bold" id="button-start-server">СТАРТ</button>
             <button type="button" class="btn btn-primary fw-bold disabled" id="button-stop-server">СТОП</button>
         </div>
+
+        <div class="col-3 btn-group">
+            <input type="radio" class="btn-check" name="options" id="radio-string-mode" autocomplete="off">
+            <label class="btn btn-secondary fw-bold" for="radio-string-mode">STRING</label>
+            <input type="radio" class="btn-check" name="options" id="radio-bytes-mode" autocomplete="off" checked>
+            <label class="btn btn-secondary fw-bold" for="radio-bytes-mode">BYTES</label>
+        </div>
+
         <div class="col-auto">
             <button type="button" class="btn btn-primary fw-bold" id="button-clear-log">ОЧИСТИТЬ ЖУРНАЛ</button>
         </div>
