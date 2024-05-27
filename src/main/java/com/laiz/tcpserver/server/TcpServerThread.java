@@ -66,9 +66,10 @@ public class TcpServerThread {
                         case BYTES:
                             StringBuilder stringBuilder = new StringBuilder();
                             for (byte messageByte : message) {
-                                stringBuilder.append(Integer.toString(messageByte, 16));
+                                String strByte = String.format("%02X ", messageByte);
+                                stringBuilder.append(strByte);
                             }
-                            messageContent = stringBuilder.toString();
+                            messageContent = stringBuilder.toString().trim();
                             break;
                         case STRING:
                             messageContent = new String(message, StandardCharsets.UTF_8);
