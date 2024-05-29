@@ -1,6 +1,5 @@
-const buttonClearIp = document.querySelector('#button-clear-ip')
-const buttonClearEndOfMessage = document.querySelector('#button-clear-end-of-message')
-const buttonDefaultIp = document.querySelector('#button-default-ip')
+const buttonClear = document.querySelector('#button-clear')
+const buttonDefault = document.querySelector('#button-default')
 const buttonStartServer = document.querySelector('#button-start-server')
 const buttonStopServer = document.querySelector('#button-stop-server')
 const radioBytesMode = document.querySelector('#radio-bytes-mode')
@@ -9,43 +8,50 @@ const inputIpByte3 = document.querySelector('#input-ip-byte3')
 const inputIpByte2 = document.querySelector('#input-ip-byte2')
 const inputIpByte1 = document.querySelector('#input-ip-byte1')
 const inputIpByte0 = document.querySelector('#input-ip-byte0')
-const endOfMessageByte = document.querySelector('#end-of-message-byte')
+const inputPort = document.querySelector('#input-port')
+const inputEndOfMessage = document.querySelector('#input-end-of-message-byte')
+const checkBoxAddEnter = document.querySelector('#check-box-add-enter')
 const outputTable = document.querySelector('#output-table')
 let timerID
 let rowIndex = 0
 
 
-buttonClearIp.onclick = () => {
+buttonClear.onclick = () => {
     inputIpByte3.value = null
     inputIpByte2.value = null
     inputIpByte1.value = null
     inputIpByte0.value = null
+    inputPort.value = null
+    inputEndOfMessage.value = null
 }
 
 
-buttonClearEndOfMessage.onclick = () => {
-    endOfMessageByte.value = null
-}
-
-
-buttonDefaultIp.onclick = () => {
+buttonDefault.onclick = () => {
     inputIpByte3.value = 127
     inputIpByte2.value = 0
     inputIpByte1.value = 0
     inputIpByte0.value = 1
+    inputPort.value = 2404
+    inputEndOfMessage.value = 13
 }
 
 
 buttonStartServer.onclick = () => {
     toggleButtons()
-    const serverIp = getIp()
+
     let messageMode = 'string'
-    const endOfMessage = endOfMessageByte.value;
+    const serverIp = getIp()
+    const port = inputPort.value;
+    const endOfMessage = inputEndOfMessage.value;
+    let addEnter = '0';
+
     console.log(`Start server request at ${serverIp} address...`)
+
     if (radioBytesMode.checked) messageMode = 'bytes'
-    fetch(`http://${serverIp}:8080/tcp-server/start/${messageMode}?e=${endOfMessage}`, {
-        method: "POST"
-    })
+    if (checkBoxAddEnter.checked) addEnter = '1'
+
+    const query = `http://${serverIp}:8080/tcp-server/start/${messageMode}?p=${port}&e=${endOfMessage}&a=${addEnter}`
+    fetch(query, {method: "POST"})
         .then(() => {
             console.log('Start server OK!')
         })
@@ -57,8 +63,11 @@ buttonStartServer.onclick = () => {
 
 buttonStopServer.onclick = () => {
     toggleButtons()
+
     const serverIp = getIp()
+
     console.log(`Stop server request at ${serverIp} address...`)
+
     fetch(`http://${serverIp}:8080/tcp-server/stop`, {
         method: "POST"
     })
@@ -86,7 +95,9 @@ console.log('Data receiving started!')
 
 function getData() {
     const serverIp = getIp()
+
     console.log(`TCP server output data request at ${serverIp} address...`)
+
     fetch(`http://${serverIp}:8080/tcp-server/output`)
         .then(response => {
             console.log('Server response received!')

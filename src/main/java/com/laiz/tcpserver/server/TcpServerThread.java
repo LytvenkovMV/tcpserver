@@ -4,6 +4,8 @@ import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -14,32 +16,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Slf4j
-@Component
+@Component()
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Async
 public class TcpServerThread {
 
-    private static StateEnum threadState;
-    private static MessageTypeEnum messageType;
+    private StateEnum threadState;
 
-    private static byte endByte;
-
-    public static void setThreadState(StateEnum threadState) {
-        TcpServerThread.threadState = threadState;
-    }
-
-    public static void setMessageType(MessageTypeEnum messageType) {
-        TcpServerThread.messageType = messageType;
-    }
-
-    public static void setEndByte(byte endByte) {
-        TcpServerThread.endByte = endByte;
-    }
-
-    @Async
-    public void run(ServerSocket server) {
+    public void run(ServerSocket server, MessageTypeEnum messageType, byte endByte, boolean isAddEnter) {
 
         Socket socket = null;
         DataInputStream dataInputStream = null;
         DataOutputStream dataOutputStream = null;
+
+        threadState = StateEnum.STARTED;
 
         while (threadState == StateEnum.STARTED) {
             try {
@@ -80,8 +70,10 @@ public class TcpServerThread {
 
                     dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
                     dataOutputStream.write(message);
-//                    dataOutputStream.write(13);
-//                    dataOutputStream.write(10);
+                    if (isAddEnter) {
+                        dataOutputStream.write(13);
+                        dataOutputStream.write(10);
+                    }
                     dataOutputStream.flush();
 
                     log.info("Response sent. Waiting for new message...");
@@ -110,6 +102,10 @@ public class TcpServerThread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void stop() {
+        threadState = StateEnum.STOPPED;
     }
 }
 

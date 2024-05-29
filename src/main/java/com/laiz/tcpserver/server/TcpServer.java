@@ -4,68 +4,81 @@ import com.laiz.tcpserver.enums.CmdEnum;
 import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.service.MessageService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Optional;
 
 @Slf4j
-@Component
-@RequiredArgsConstructor
+@Service
 public class TcpServer {
 
-    private final TcpServerThread tcpServerThread;
-    private static ServerSocket server;
-    private static StateEnum serverState = StateEnum.STOPPED;
-    private static MessageTypeEnum messageType = MessageTypeEnum.STRING;
-    private static CmdEnum startCmd = CmdEnum.NOT_ACTIVE;
-    private static CmdEnum stopCmd = CmdEnum.NOT_ACTIVE;
-    private static final int port = 2404;
-    private static final byte defaultEndByte = Byte.parseByte("13");
-    private static byte endByte = defaultEndByte;
+    @Autowired
+    private TcpServerThread tcpServerThread;
 
-    public static void start(Optional<String> messageTypeVar, Optional<String> endByteVar) {
+    private ServerSocket server;
+
+    private StateEnum serverState;
+
+    private CmdEnum startCmd;
+    private CmdEnum stopCmd;
+
+    Optional<String> userPort;
+    Optional<String> userMessageType;
+    Optional<String> userEndByte;
+    Optional<String> userAddEnter;
+
+    public void start(Optional<String> port, Optional<String> messageType, Optional<String> endByte, Optional<String> addEnter) {
         if (serverState != StateEnum.STARTED) {
+
+            this.userPort = port;
+            this.userMessageType = messageType;
+            this.userEndByte = endByte;
+            this.userAddEnter = addEnter;
+
+            /* Activate START command */
             startCmd = CmdEnum.ACTIVE;
-            if (messageTypeVar.isPresent()) {
-                if (messageTypeVar.get().equals("string")) messageType = MessageTypeEnum.STRING;
-                if (messageTypeVar.get().equals("bytes")) messageType = MessageTypeEnum.BYTES;
-            }
-            if (endByteVar.isPresent()) {
-                try {
-                    endByte = Byte.parseByte(endByteVar.get());
-                } catch (Exception e) {
-                    endByte = defaultEndByte;
-                }
-            }
+
             log.info("Starting server...");
             MessageService.add("TCP сервер", "Запускается...");
         }
     }
 
-    public static void stop() {
+    public void stop() {
         if (serverState != StateEnum.STOPPED) {
+
+            /* Activate STOP command */
+            stopCmd = CmdEnum.ACTIVE;
+
             log.info("Stopping server...");
             MessageService.add("TCP сервер", "Останавливается...");
-            stopCmd = CmdEnum.ACTIVE;
         }
     }
 
     @Scheduled(fixedDelay = 100)
     public void handleCommands() {
+
+        /* Handle START command */
         if (startCmd == CmdEnum.ACTIVE) {
             try {
+                /* Create TCP server */
+                int port = getPort();
                 server = new ServerSocket(port);
-                TcpServerThread.setMessageType(messageType);
-                TcpServerThread.setEndByte(endByte);
-                TcpServerThread.setThreadState(StateEnum.STARTED);
-                tcpServerThread.run(server);
+
+                /* Launch TCP server thread */
+                MessageTypeEnum messageType = getMessageType();
+                byte endByte = getEndByte();
+                boolean isAddEnter = getAddEnter();
+                tcpServerThread.run(server, messageType, endByte, isAddEnter);
+
+                /* Change server state and reset command */
                 serverState = StateEnum.STARTED;
                 startCmd = CmdEnum.NOT_ACTIVE;
+
                 log.info("Server started. Waiting for the client connection...");
                 MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
             } catch (IOException e) {
@@ -73,18 +86,67 @@ public class TcpServer {
             }
         }
 
+        /* Handle STOP command */
         if (stopCmd == CmdEnum.ACTIVE) {
             try {
-                TcpServerThread.setThreadState(StateEnum.STOPPED);
+                /* Terminate TCP server thread */
+                tcpServerThread.stop();
+
+                /* Wait */
+                Thread.sleep(3000);
+
+                /* Close TCP server */
                 server.close();
+
+                /* Change server state and reset command */
                 serverState = StateEnum.STOPPED;
                 stopCmd = CmdEnum.NOT_ACTIVE;
+
                 log.info("Server stopped");
                 MessageService.add("TCP сервер", "Остановлен");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private int getPort() {
+        int port = 2404;
+        if (userPort.isPresent()) {
+            try {
+                port = Integer.parseInt(userPort.get());
+            } catch (Exception e) {
+            }
+        }
+        return port;
+    }
+
+    private MessageTypeEnum getMessageType() {
+        MessageTypeEnum messageType = MessageTypeEnum.BYTES;
+        if (userMessageType.isPresent()) {
+            if (userMessageType.get().equals("string")) messageType = MessageTypeEnum.STRING;
+            else if (userMessageType.get().equals("bytes")) messageType = MessageTypeEnum.BYTES;
+        }
+        return messageType;
+    }
+
+    private byte getEndByte() {
+        byte endByte = Byte.parseByte("13");
+        if (userEndByte.isPresent()) {
+            try {
+                endByte = Byte.parseByte(userEndByte.get());
+            } catch (Exception e) {
+            }
+        }
+        return endByte;
+    }
+
+    private boolean getAddEnter() {
+        boolean isAddEnter = false;
+        if (userAddEnter.isPresent()) {
+            if (userAddEnter.get().equals("1")) isAddEnter = true;
+        }
+        return isAddEnter;
     }
 }
 
