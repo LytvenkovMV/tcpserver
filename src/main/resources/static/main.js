@@ -10,7 +10,7 @@ const inputIpByte1 = document.querySelector('#input-ip-byte1')
 const inputIpByte0 = document.querySelector('#input-ip-byte0')
 const inputPort = document.querySelector('#input-port')
 const inputEndOfMessage = document.querySelector('#input-end-of-message-byte')
-const checkBoxAddEnter = document.querySelector('#check-box-add-enter')
+const btnCheckAddEnter = document.querySelector('#btn-check-add-enter')
 const outputTable = document.querySelector('#output-table')
 let timerID
 let rowIndex = 0
@@ -41,16 +41,20 @@ buttonStartServer.onclick = () => {
 
     let messageMode = 'string'
     const serverIp = getIp()
-    const port = inputPort.value;
-    const endOfMessage = inputEndOfMessage.value;
+    const port = inputPort.value.toString();
+    const endOfMessage = inputEndOfMessage.value.toString();
     let addEnter = '0';
+    let searchParams = new URLSearchParams();
+
+    if (radioBytesMode.checked) messageMode = 'bytes'
+    if (btnCheckAddEnter.checked) addEnter = '1'
+    if (port.length > 0) searchParams.append('p',port)
+    if (endOfMessage.length > 0) searchParams.append('e',endOfMessage)
+    searchParams.append('a',addEnter)
 
     console.log(`Start server request at ${serverIp} address...`)
 
-    if (radioBytesMode.checked) messageMode = 'bytes'
-    if (checkBoxAddEnter.checked) addEnter = '1'
-
-    const query = `http://${serverIp}:8080/tcp-server/start/${messageMode}?p=${port}&e=${endOfMessage}&a=${addEnter}`
+    const query = `http://${serverIp}:8080/tcp-server/start/${messageMode}?${searchParams.toString()}`
     fetch(query, {method: "POST"})
         .then(() => {
             console.log('Start server OK!')

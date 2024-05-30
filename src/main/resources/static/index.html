@@ -22,20 +22,15 @@
         <div class="col-auto h6">
             <ol>
                 <li>Открыть браузер. В строке адреса набрать адрес http://***.***.***.***:8080,
-                    где ***.***.***.*** это IP адрес машины, на которой запущено приложение.
-                </li>
+                    где ***.***.***.*** это IP адрес машины, на которой запущено приложение.</li>
                 <li>В поле "IP АДРЕС" ввести IP адрес машины, на которой запущено приложение.</li>
-                <li>В поле "ПОРТ" ввести порт, который будет слушать сервер (по умолчанию 2404).</li>
-                <li>В поле "EOFM БАЙТ" ввести байт, сигнализирующий конец сообщения в десятичной системе (по умолчанию
-                    13 "ENTER").
-                </li>
+                <li>В поле "ПОРТ" ввести порт, который будет слушать сервер.</li>
+                <li>В поле "EOFM БАЙТ" ввести байт, сигнализирующий конец сообщения в десятичной системе.</li>
                 <li>Выбрать формат полученного сообщения - в виде символов ASCII или в виде байтов в шестнадцатеричной
-                    системе.
-                </li>
+                    системе.</li>
                 <li>Запустить сервер кнопкой "СТАРТ".</li>
                 <li>Подключиться к серверу по протоколу TCP (например при помощи Putty в режиме Raw). Отправить на
-                    сервер сообщение длиной до 1000 символов.
-                </li>
+                    сервер сообщение длиной до 1000 символов.</li>
                 <li>Сервер отправит в ответ копию вашего сообщения.</li>
                 <li>Остановить сервер кнопкой "СТОП".</li>
             </ol>
@@ -65,23 +60,26 @@
                        minlength="1" maxlength="3" aria-label="Байт конца сообщения">
                 <button type="button" class="btn btn-outline-secondary" id="button-clear">СБРОС</button>
                 <button type="button" class="btn btn-outline-secondary" id="button-default">ДЕФОЛТ</button>
-                <input class="form-check-input" type="checkbox" value="" id="check-box-add-enter">
-                <label class="form-check-label" for="check-box-add-enter">Добавить ENTER в конце</label>
             </div>
         </div>
     </div>
 
     <div class="row justify-content-between mb-3">
-        <div class="col-4 btn-group">
+        <div class="col-3 btn-group">
             <button type="button" class="btn btn-primary fw-bold" id="button-start-server">СТАРТ</button>
             <button type="button" class="btn btn-primary fw-bold disabled" id="button-stop-server">СТОП</button>
         </div>
 
         <div class="col-3 btn-group">
             <input type="radio" class="btn-check" name="options" id="radio-string-mode" autocomplete="off">
-            <label class="btn btn-secondary fw-bold" for="radio-string-mode">STRING</label>
+            <label class="btn btn-outline-secondary fw-bold" for="radio-string-mode">STRING</label>
             <input type="radio" class="btn-check" name="options" id="radio-bytes-mode" autocomplete="off" checked>
-            <label class="btn btn-secondary fw-bold" for="radio-bytes-mode">BYTES</label>
+            <label class="btn btn-outline-secondary fw-bold" for="radio-bytes-mode">BYTES</label>
+        </div>
+
+        <div class="col-auto">
+            <input type="checkbox" class="btn-check" id="btn-check-add-enter" autocomplete="off">
+            <label class="btn btn-outline-secondary fw-bold" for="btn-check-add-enter">ДОБАВИТЬ ENTER В КОНЦЕ</label><br>
         </div>
 
         <div class="col-auto">
