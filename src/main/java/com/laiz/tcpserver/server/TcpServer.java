@@ -11,12 +11,18 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class TcpServer {
+
+    private static final int NTHREADS = 32;
+    Executor executor = Executors.newFixedThreadPool(NTHREADS);
 
     private final TcpServerThread tcpServerThread;
     private static ServerSocket server;
@@ -63,11 +69,15 @@ public class TcpServer {
                 TcpServerThread.setMessageType(messageType);
                 TcpServerThread.setEndByte(endByte);
                 TcpServerThread.setThreadState(StateEnum.STARTED);
-                tcpServerThread.run(server);
+
                 serverState = StateEnum.STARTED;
                 startCmd = CmdEnum.NOT_ACTIVE;
                 log.info("Server started. Waiting for the client connection...");
                 MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
+
+                Socket socket = server.accept();
+                Runnable task = () -> tcpServerThread.handleRequest(socket);
+                executor.execute(task);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -76,9 +86,11 @@ public class TcpServer {
         if (stopCmd == CmdEnum.ACTIVE) {
             try {
                 TcpServerThread.setThreadState(StateEnum.STOPPED);
+
                 server.close();
                 serverState = StateEnum.STOPPED;
                 stopCmd = CmdEnum.NOT_ACTIVE;
+
                 log.info("Server stopped");
                 MessageService.add("TCP сервер", "Остановлен");
             } catch (IOException e) {
