@@ -24,32 +24,34 @@ public class TcpServer {
     private static final int NTHREADS = 32;
     Executor executor = Executors.newFixedThreadPool(NTHREADS);
 
-    private final TcpServerThread tcpServerThread;
     private static ServerSocket server;
     private static StateEnum serverState = StateEnum.STOPPED;
     private static MessageTypeEnum messageType = MessageTypeEnum.STRING;
     private static CmdEnum startCmd = CmdEnum.NOT_ACTIVE;
     private static CmdEnum stopCmd = CmdEnum.NOT_ACTIVE;
-    private static final int port = 2404;
-    private static final byte defaultEndByte = Byte.parseByte("13");
-    private static byte endByte = defaultEndByte;
+    private static final int PORT = 2404;
+    private static final byte DEFAULT_END_BYTE = Byte.parseByte("13");
+    private static byte endByte = DEFAULT_END_BYTE;
 
     public static void start(Optional<String> messageTypeVar, Optional<String> endByteVar) {
         if (serverState != StateEnum.STARTED) {
+            log.info("Starting server...");
+            MessageService.add("TCP сервер", "Запускается...");
+
             startCmd = CmdEnum.ACTIVE;
+
             if (messageTypeVar.isPresent()) {
                 if (messageTypeVar.get().equals("string")) messageType = MessageTypeEnum.STRING;
                 if (messageTypeVar.get().equals("bytes")) messageType = MessageTypeEnum.BYTES;
             }
+
             if (endByteVar.isPresent()) {
                 try {
                     endByte = Byte.parseByte(endByteVar.get());
                 } catch (Exception e) {
-                    endByte = defaultEndByte;
+                    endByte = DEFAULT_END_BYTE;
                 }
             }
-            log.info("Starting server...");
-            MessageService.add("TCP сервер", "Запускается...");
         }
     }
 
@@ -57,6 +59,7 @@ public class TcpServer {
         if (serverState != StateEnum.STOPPED) {
             log.info("Stopping server...");
             MessageService.add("TCP сервер", "Останавливается...");
+
             stopCmd = CmdEnum.ACTIVE;
         }
     }
@@ -65,18 +68,21 @@ public class TcpServer {
     public void handleCommands() {
         if (startCmd == CmdEnum.ACTIVE) {
             try {
-                server = new ServerSocket(port);
-                TcpServerThread.setMessageType(messageType);
-                TcpServerThread.setEndByte(endByte);
-                TcpServerThread.setThreadState(StateEnum.STARTED);
+                server = new ServerSocket(PORT);
 
                 serverState = StateEnum.STARTED;
                 startCmd = CmdEnum.NOT_ACTIVE;
+
                 log.info("Server started. Waiting for the client connection...");
                 MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
 
                 Socket socket = server.accept();
-                Runnable task = () -> tcpServerThread.handleRequest(socket);
+
+                TcpServerThread.setMessageType(messageType);
+                TcpServerThread.setEndByte(endByte);
+                TcpServerThread.setThreadState(StateEnum.STARTED);
+                Runnable task = () -> TcpServerThread.handleRequest(socket);
+
                 executor.execute(task);
             } catch (IOException e) {
                 e.printStackTrace();
