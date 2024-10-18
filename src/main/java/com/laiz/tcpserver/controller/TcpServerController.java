@@ -1,8 +1,8 @@
 package com.laiz.tcpserver.controller;
 
 import com.laiz.tcpserver.dao.AppMessage;
-import com.laiz.tcpserver.server.TcpServer;
 import com.laiz.tcpserver.service.MessageService;
+import com.laiz.tcpserver.service.StartStopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +17,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TcpServerController {
 
+    private final StartStopService service;
+
     @GetMapping("/output")
     public List<AppMessage> getOutputData() {
         log.info("Output data request");
@@ -29,12 +31,12 @@ public class TcpServerController {
     public void startServer(@PathVariable("type") Optional<String> messageType,
                             @RequestParam("e") Optional<String> endOfMessage) {
         log.info("Start command received");
-        TcpServer.start(messageType, endOfMessage);
+        service.start(messageType, endOfMessage);
     }
 
     @PostMapping("/stop")
     public void stopServer() {
         log.info("Stop command received");
-        TcpServer.stop();
+        service.stop();
     }
 }

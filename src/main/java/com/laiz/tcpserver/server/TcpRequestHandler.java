@@ -5,7 +5,6 @@ import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.service.MessageService;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.Socket;
@@ -13,8 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @Slf4j
-@Component
-public class TcpServerThread {
+public class TcpRequestHandler {
 
     @Setter
     private static StateEnum threadState;
@@ -74,11 +72,11 @@ public class TcpServerThread {
             }
         }
 
-        try {
-            if (socket != null) socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            if (socket != null) socket.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }
 
