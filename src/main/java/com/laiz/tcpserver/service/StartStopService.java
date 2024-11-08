@@ -33,7 +33,7 @@ public class StartStopService {
                     byte endByte = Byte.parseByte(endByteVar.get());
                     TcpServer.setEndByte(endByte);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.info("End of message byte wasn't set by the client. Using default value");
                 }
             }
 
