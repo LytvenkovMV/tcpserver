@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    generate-unique-name: false
+    name: tcpserverdb
+    url: jdbc:postgresql://localhost:5432/tcpserverdb
+    username: postgres
+    password: 12345
+    driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+   com.laiz.tcpserver: debug
+   org:
+    hibernate:
+        SQL: debug
+        type.descriptor.sql.BasicBinder: trace

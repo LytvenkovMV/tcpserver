@@ -6,6 +6,8 @@ import com.laiz.tcpserver.service.MessageService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
+@Component
 public class TcpServer {
 
     private static final int NTHREADS = 32;
@@ -34,12 +37,15 @@ public class TcpServer {
     @Setter
     private static byte endByte = DEFAULT_END_BYTE;
 
-    private static ExecutorService executor;
+    private ExecutorService executor;
+
+    @Autowired
+    private TcpRequestHandler handler;
 
     private static ServerSocket server;
     private static Socket socket;
 
-    public static void runServer() {
+    public void runServer() {
 
         try {
             server = new ServerSocket(PORT);
@@ -56,7 +62,7 @@ public class TcpServer {
                     TcpRequestHandler.setMessageType(messageType);
                     TcpRequestHandler.setEndByte(endByte);
                     TcpRequestHandler.setThreadState(StateEnum.STARTED);
-                    Runnable task = () -> TcpRequestHandler.handleRequest(socket);
+                    Runnable task = () -> handler.handleRequest(socket);
 
                     executor = Executors.newFixedThreadPool(NTHREADS);
                     executor.execute(task);

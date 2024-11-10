@@ -3,17 +3,24 @@ package com.laiz.tcpserver.server;
 import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.service.MessageService;
+import com.laiz.tcpserver.service.PacketService;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class TcpRequestHandler {
 
+    private final PacketService packetService;
     @Setter
     private static StateEnum threadState;
     @Setter
@@ -21,7 +28,7 @@ public class TcpRequestHandler {
     @Setter
     private static byte endByte;
 
-    public static void handleRequest(Socket socket) {
+    public void handleRequest(Socket socket) {
 
         while (threadState == StateEnum.STARTED) {
             try {
@@ -60,23 +67,21 @@ public class TcpRequestHandler {
                 log.info("Message received. Message content: " + messageContent);
                 MessageService.add("Процесс обмена по TCP", "Сообщение получено. Его содержание: " + messageContent);
 
-                dataOutputStream.write(message);
-                dataOutputStream.flush();
+                List<byte[]> responseMessages = packetService.saveMessageAndGetResponseList(message);
 
-                log.info("Response sent. Waiting for new message...");
-                MessageService.add("Процесс обмена по TCP", "Ответ отправлен. Сервер ждет новое сообщение...");
-
+                if (!responseMessages.isEmpty()) {
+                    for (byte[] m : responseMessages) {
+                        dataOutputStream.write(m);
+                        dataOutputStream.flush();
+                    }
+                    log.info("Response sent. Waiting for new message...");
+                    MessageService.add("Процесс обмена по TCP", "Ответ отправлен. Сервер ждет новое сообщение...");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 break;
             }
         }
-
-//        try {
-//            if (socket != null) socket.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 }
 

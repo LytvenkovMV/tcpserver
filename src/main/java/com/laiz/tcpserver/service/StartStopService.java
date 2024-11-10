@@ -4,7 +4,9 @@ import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.server.TcpServer;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,10 +15,11 @@ import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class StartStopService {
 
-    private static ExecutorService executor;
+    @Autowired
+    private TcpServer tcpServer;
+    private ExecutorService executor;
 
     public void start(Optional<String> messageTypeVar, Optional<String> endByteVar) {
         if (TcpServer.getServerState() != StateEnum.STARTED) {
@@ -40,7 +43,7 @@ public class StartStopService {
             TcpServer.setServerState(StateEnum.STARTED);
 
             executor = Executors.newSingleThreadExecutor();
-            executor.execute(TcpServer::runServer);
+            executor.execute(tcpServer::runServer);
         }
     }
 
