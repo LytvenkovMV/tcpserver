@@ -3,8 +3,6 @@ package com.laiz.tcpserver.service;
 import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.server.TcpServer;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +22,7 @@ public class StartStopService {
     public void start(Optional<String> messageTypeVar, Optional<String> endByteVar) {
         if (TcpServer.getServerState() != StateEnum.STARTED) {
             log.info("Starting server...");
-            MessageService.add("TCP сервер", "Запускается...");
+            UILogService.add("TCP сервер", "Запускается...");
 
             if (messageTypeVar.isPresent()) {
                 if (messageTypeVar.get().equals("string")) TcpServer.setMessageType(MessageTypeEnum.STRING);
@@ -50,7 +48,7 @@ public class StartStopService {
     public void stop() {
         if (TcpServer.getServerState() != StateEnum.STOPPED) {
             log.info("Stopping server...");
-            MessageService.add("TCP сервер", "Останавливается...");
+            UILogService.add("TCP сервер", "Останавливается...");
 
             TcpServer.setServerState(StateEnum.STOPPED);
             executor.shutdownNow();

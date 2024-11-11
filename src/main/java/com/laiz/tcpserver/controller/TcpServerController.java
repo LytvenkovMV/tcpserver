@@ -1,7 +1,7 @@
 package com.laiz.tcpserver.controller;
 
-import com.laiz.tcpserver.dao.AppMessage;
-import com.laiz.tcpserver.service.MessageService;
+import com.laiz.tcpserver.dao.UiLogRecord;
+import com.laiz.tcpserver.service.UILogService;
 import com.laiz.tcpserver.service.StartStopService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +20,11 @@ public class TcpServerController {
     private final StartStopService service;
 
     @GetMapping("/output")
-    public List<AppMessage> getOutputData() {
-        log.info("Output data request");
-        List<AppMessage> appMessages = MessageService.give();
-        log.info(appMessages.size() + " new messages sent");
-        return appMessages;
+    public List<UiLogRecord> getLogRecords() {
+        log.info("Log records request");
+        List<UiLogRecord> uiLogRecords = UILogService.poll();
+        log.info(uiLogRecords.size() + " new log records sent");
+        return uiLogRecords;
     }
 
     @PostMapping(value = {"/start", "/start/{type}"})

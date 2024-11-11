@@ -2,7 +2,7 @@ package com.laiz.tcpserver.server;
 
 import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
-import com.laiz.tcpserver.service.MessageService;
+import com.laiz.tcpserver.service.UILogService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,10 @@ import java.util.concurrent.Executors;
 @Component
 public class TcpServer {
 
-    private static final int NTHREADS = 32;
+    private static final int NTHREADS = 200;
     private static final int PORT = 2404;
     public static final int SO_TIMEOUT = 3000;
-    private static final byte DEFAULT_END_BYTE = Byte.parseByte("13");
+    private static final byte DEFAULT_END_BYTE = 0x13;
 
     @Getter
     @Setter
@@ -53,7 +53,7 @@ public class TcpServer {
             serverState = StateEnum.STARTED;
 
             log.info("Server started. Waiting for the client connection...");
-            MessageService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
+            UILogService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
 
             while (serverState != StateEnum.STOPPED) {
                 try {
@@ -78,7 +78,7 @@ public class TcpServer {
             server.close();
 
             log.info("Server stopped");
-            MessageService.add("TCP сервер", "Остановлен");
+            UILogService.add("TCP сервер", "Остановлен");
 
         } catch (IOException e) {
             e.printStackTrace();

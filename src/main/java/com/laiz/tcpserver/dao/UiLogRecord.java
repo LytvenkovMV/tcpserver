@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppMessage {
+public class UiLogRecord {
 
     private String time;
     private String source;
