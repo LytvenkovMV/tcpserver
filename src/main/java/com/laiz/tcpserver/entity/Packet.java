@@ -22,4 +22,8 @@ public class Packet {
 
     @Column(name = "data")
     byte[] data;
+
+    @Version
+    @Column(name = "opt_lock")
+    long version;
 }

@@ -22,7 +22,7 @@ public class PacketService {
     private static final byte END_BYTE = 0x20;
     private final PacketRepository repository;
 
-    @Transactional(propagation = Propagation.NEVER,
+    @Transactional(propagation = Propagation.REQUIRED,
             isolation = Isolation.REPEATABLE_READ)
     public List<byte[]> saveMessageAndGetResponseList(byte[] message) {
         Packet packet = parseMessage(message);

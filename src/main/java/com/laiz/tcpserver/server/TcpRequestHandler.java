@@ -33,16 +33,25 @@ public class TcpRequestHandler {
     public void handleRequest(Socket socket) {
 
         while (threadState == StateEnum.STARTED) {
+
+            DataInputStream dataInputStream;
+            DataOutputStream dataOutputStream;
             try {
-                DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-                DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+                dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+                dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            } catch (IOException e) {
+                log.warn("IOException was thrown during creating socket input/output streams");
+                break;
+            }
 
-                log.info("Client connected. Waiting for message...");
-                UILogService.add("Соединение № " + Thread.currentThread().getId(), "Клиент подключен. Сервер ждет сообщение...");
+            log.info("Client connected. Waiting for message...");
+            UILogService.add("Соединение № " + Thread.currentThread().getId(), "Клиент подключен. Сервер ждет сообщение...");
 
-                int messageLength = 0;
-                byte[] inputBytes = new byte[1000];
-                boolean isStart = false;
+            int messageLength = 0;
+            byte[] inputBytes = new byte[1000];
+            boolean isStart = false;
+
+            try {
                 for (int i = 0; i < 1000; i++) {
                     byte inputByte = dataInputStream.readByte();
                     if (inputByte == START_BYTE) isStart = true;
@@ -52,15 +61,21 @@ public class TcpRequestHandler {
                         if (inputByte == endByte) break;
                     }
                 }
-                byte[] message = Arrays.copyOf(inputBytes, messageLength);
+            } catch (Exception e) {
+                log.warn("IOException was thrown during reading from socket");
+                break;
+            }
 
-                String rxMessageContent = getMessageContent(message);
-                log.info("Message received. Message content: " + rxMessageContent);
-                UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение получено. Его содержание: " + rxMessageContent);
+            byte[] message = Arrays.copyOf(inputBytes, messageLength);
 
-                List<byte[]> responseMessages = packetService.saveMessageAndGetResponseList(message);
+            String rxMessageContent = getMessageContent(message);
+            log.info("Message received. Message content: " + rxMessageContent);
+            UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение получено. Его содержание: " + rxMessageContent);
 
-                if (!responseMessages.isEmpty()) {
+            List<byte[]> responseMessages = packetService.saveMessageAndGetResponseList(message);
+
+            if (!responseMessages.isEmpty()) {
+                try {
                     for (byte[] m : responseMessages) {
                         dataOutputStream.write(m);
                         dataOutputStream.flush();
@@ -69,14 +84,10 @@ public class TcpRequestHandler {
                         log.info("Response sent. Response content: " + txMessageContent);
                         UILogService.add("Соединение № " + Thread.currentThread().getId(), "Ответ отправлен. Его содержание: " + txMessageContent);
                     }
+                } catch (Exception e) {
+                    log.warn("IOException was thrown during writing to socket");
+                    break;
                 }
-
-                log.info("Waiting for new message...");
-                UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сервер ждет новое сообщение...");
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                break;
             }
         }
     }
