@@ -4,8 +4,10 @@ import com.laiz.tcpserver.entity.Packet;
 import com.laiz.tcpserver.repository.PacketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -28,8 +30,8 @@ public class PacketService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW,
             isolation = Isolation.REPEATABLE_READ)
-    @Retryable(maxAttempts = 5,
-            backoff = @Backoff(delay = 50))
+    @Retryable(maxAttempts = 15,
+            backoff = @Backoff(delay = 500))
     @Lock(LockModeType.OPTIMISTIC)
     public List<byte[]> saveMessageAndGetResponseList(byte[] message) {
         Packet packet = parseMessage(message);
@@ -44,17 +46,24 @@ public class PacketService {
 
         List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), getOppositeTag(packet.getTag()));
         List<byte[]> responseMessages = new ArrayList<>();
-        if (responsePackets != null) {
-            responseMessages = responsePackets.stream()
-                    .map(Packet::getData)
-                    .collect(Collectors.toList());
-            repository.deleteAll(responsePackets);
+        if (responsePackets != null && (!responsePackets.isEmpty())) {
+//            responseMessages = responsePackets.stream()
+//                    .map(Packet::getData)
+//                    .collect(Collectors.toList());
+//            repository.deleteAll(responsePackets);
+            responseMessages.add(responsePackets.get(0).getData());
+            repository.delete(responsePackets.get(0));
         }
 
         log.info("Found " + responseMessages.size() + " output messages");
         UILogService.add("Соединение № " + Thread.currentThread().getId(), "Найдено " + responseMessages.size() + " сообщений для ответа");
 
         return responseMessages;
+    }
+
+    @Recover
+    public void recover(RuntimeException e) {
+        log.info("Recover method!!!!!!!!!!!!!!!!!!!");
     }
 
     private Packet parseMessage(byte[] message) {
