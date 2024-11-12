@@ -21,22 +21,22 @@ public class TcpServerController {
 
     @GetMapping("/output")
     public List<UiLogRecord> getLogRecords() {
-        log.info("Log records request");
+        log.trace("Log records request");
         List<UiLogRecord> uiLogRecords = UILogService.poll();
-        log.info(uiLogRecords.size() + " new log records sent");
+        log.trace(uiLogRecords.size() + " new log records sent");
         return uiLogRecords;
     }
 
     @PostMapping(value = {"/start", "/start/{type}"})
     public void startServer(@PathVariable("type") Optional<String> messageType,
                             @RequestParam("e") Optional<String> endOfMessage) {
-        log.info("Start command received");
+        log.trace("Start command received");
         service.start(messageType, endOfMessage);
     }
 
     @PostMapping("/stop")
     public void stopServer() {
-        log.info("Stop command received");
+        log.trace("Stop command received");
         service.stop();
     }
 }

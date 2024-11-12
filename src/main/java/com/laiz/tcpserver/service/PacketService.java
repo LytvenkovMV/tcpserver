@@ -5,8 +5,9 @@ import com.laiz.tcpserver.repository.PacketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,9 +30,14 @@ public class PacketService {
     @Transactional(propagation = Propagation.REQUIRES_NEW,
             isolation = Isolation.REPEATABLE_READ)
     @Retryable(maxAttempts = 5,
-            backoff = @Backoff(delay = 50))
+            recover = "recoverMethod")
     @Lock(LockModeType.OPTIMISTIC)
     public List<byte[]> saveMessageAndGetResponseList(byte[] message) {
+        int retryCount = RetrySynchronizationManager.getContext().getRetryCount();
+        if (retryCount > 0) {
+            log.warn("Retry after transaction rollback. Attempt #{}", RetrySynchronizationManager.getContext().getRetryCount() + 1);
+        }
+
         Packet packet = parseMessage(message);
 
         log.info("Input message parsed successfully");
@@ -44,7 +50,7 @@ public class PacketService {
 
         List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), getOppositeTag(packet.getTag()));
         List<byte[]> responseMessages = new ArrayList<>();
-        if (responsePackets != null) {
+        if (responsePackets != null && (!responsePackets.isEmpty())) {
             responseMessages = responsePackets.stream()
                     .map(Packet::getData)
                     .collect(Collectors.toList());
@@ -55,6 +61,13 @@ public class PacketService {
         UILogService.add("Соединение № " + Thread.currentThread().getId(), "Найдено " + responseMessages.size() + " сообщений для ответа");
 
         return responseMessages;
+    }
+
+    @Recover
+    public List<byte[]> recoverMethod(RuntimeException e, byte[] message) {
+        log.warn("Retrying finished unsuccessfully. Begin recovering");
+
+        return new ArrayList<>();
     }
 
     private Packet parseMessage(byte[] message) {

@@ -67,7 +67,7 @@ public class TcpServer {
                     executor = Executors.newFixedThreadPool(NTHREADS);
                     executor.execute(task);
                 } catch (SocketTimeoutException e) {
-                    log.info("Accept timed out.");
+                    log.trace("Accept timed out.");
                 }
             }
 
