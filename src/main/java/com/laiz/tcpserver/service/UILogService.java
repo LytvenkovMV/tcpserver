@@ -11,7 +11,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class UILogService {
 
-    private static final ArrayBlockingQueue<UiLogRecord> UI_LOG_RECORDS = new ArrayBlockingQueue<>(200);
+    private static final ArrayBlockingQueue<UiLogRecord> UI_LOG_RECORDS = new ArrayBlockingQueue<>(10000);
 
     public static void add(String source, String information) {
         LocalTime localTime = java.time.LocalTime.now();

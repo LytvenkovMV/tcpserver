@@ -4,11 +4,15 @@ import com.laiz.tcpserver.entity.Packet;
 import com.laiz.tcpserver.repository.PacketRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.LockModeType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,32 +26,23 @@ public class PacketService {
     private static final byte END_BYTE = 0x20;
     private final PacketRepository repository;
 
-    @Transactional(propagation = Propagation.REQUIRED,
+    @Transactional(propagation = Propagation.REQUIRES_NEW,
             isolation = Isolation.REPEATABLE_READ)
+    @Retryable(maxAttempts = 5,
+            backoff = @Backoff(delay = 50))
+    @Lock(LockModeType.OPTIMISTIC)
     public List<byte[]> saveMessageAndGetResponseList(byte[] message) {
         Packet packet = parseMessage(message);
 
-        log.info("Input message parsed successfully...");
+        log.info("Input message parsed successfully");
         UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение прочитано успешно");
 
         repository.save(packet);
 
-        log.info("Input message saved...");
+        log.info("Input message saved");
         UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение сохранено в БД");
 
-        byte tagToTransmit;
-        switch (packet.getTag()) {
-            case 'M':
-                tagToTransmit = 'C';
-                break;
-            case 'C':
-                tagToTransmit = 'M';
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid message tag");
-        }
-        List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), tagToTransmit);
-
+        List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), getOppositeTag(packet.getTag()));
         List<byte[]> responseMessages = new ArrayList<>();
         if (responsePackets != null) {
             responseMessages = responsePackets.stream()
@@ -79,5 +74,20 @@ public class PacketService {
         packet.setData(message);
 
         return packet;
+    }
+
+    private static byte getOppositeTag(byte tag) {
+        byte opposite;
+        switch (tag) {
+            case 'M':
+                opposite = 'C';
+                break;
+            case 'C':
+                opposite = 'M';
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid message tag");
+        }
+        return opposite;
     }
 }
