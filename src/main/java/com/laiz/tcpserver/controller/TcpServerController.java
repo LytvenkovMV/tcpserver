@@ -29,9 +29,11 @@ public class TcpServerController {
 
     @PostMapping(value = {"/start", "/start/{type}"})
     public void startServer(@PathVariable("type") Optional<String> messageType,
-                            @RequestParam("e") Optional<String> endOfMessage) {
+                            @RequestParam("p") Optional<String> port,
+                            @RequestParam("e") Optional<String> endOfMessage,
+                            @RequestParam("a") Optional<String> addEnter) {
         log.trace("Start command received");
-        service.start(messageType, endOfMessage);
+        service.start(port, messageType, endOfMessage, addEnter);
     }
 
     @PostMapping("/stop")

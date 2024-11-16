@@ -29,6 +29,8 @@ public class TcpRequestHandler {
     private static MessageTypeEnum messageType;
     @Setter
     private static byte endByte;
+    @Setter
+    private static boolean addEnter;
 
     public void handleRequest(Socket socket) {
 
@@ -78,6 +80,10 @@ public class TcpRequestHandler {
                 try {
                     for (byte[] m : responseMessages) {
                         dataOutputStream.write(m);
+                        if (addEnter) {
+                            dataOutputStream.write(13);
+                            dataOutputStream.write(10);
+                        }
                         dataOutputStream.flush();
 
                         String txMessageContent = getMessageContent(message);

@@ -7,12 +7,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,8 +24,8 @@ import java.util.concurrent.Executors;
 public class TcpServer {
 
     private static final int NTHREADS = 200;
-    private static final int PORT = 2404;
     public static final int SO_TIMEOUT = 3000;
+    private static final int DEFAULT_PORT = 2404;
     private static final byte DEFAULT_END_BYTE = 0x13;
 
     @Getter
@@ -31,11 +34,19 @@ public class TcpServer {
 
     @Getter
     @Setter
+    private static int port = DEFAULT_PORT;
+
+    @Getter
+    @Setter
     private static MessageTypeEnum messageType = MessageTypeEnum.STRING;
 
     @Getter
     @Setter
     private static byte endByte = DEFAULT_END_BYTE;
+
+    @Getter
+    @Setter
+    private static boolean addEnter = false;
 
     private ExecutorService executor;
 
@@ -48,7 +59,7 @@ public class TcpServer {
     public void runServer() {
 
         try {
-            server = new ServerSocket(PORT);
+            server = new ServerSocket(port);
             server.setSoTimeout(SO_TIMEOUT);
             serverState = StateEnum.STARTED;
 
@@ -61,6 +72,7 @@ public class TcpServer {
 
                     TcpRequestHandler.setMessageType(messageType);
                     TcpRequestHandler.setEndByte(endByte);
+                    TcpRequestHandler.setAddEnter(addEnter);
                     TcpRequestHandler.setThreadState(StateEnum.STARTED);
                     Runnable task = () -> handler.handleRequest(socket);
 
@@ -85,4 +97,3 @@ public class TcpServer {
         }
     }
 }
-
