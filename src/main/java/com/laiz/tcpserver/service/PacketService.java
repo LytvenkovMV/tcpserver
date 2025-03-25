@@ -2,6 +2,7 @@ package com.laiz.tcpserver.service;
 
 import com.laiz.tcpserver.entity.Packet;
 import com.laiz.tcpserver.repository.PacketRepository;
+import com.laiz.tcpserver.settings.AppSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.Lock;
@@ -18,13 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class PacketService {
-
-    private static final byte START_BYTE = 0x68;
-    private static final byte END_BYTE = 0x20;
+    private final AppSettings appSettings;
     private final PacketRepository repository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW,
@@ -71,10 +70,13 @@ public class PacketService {
     }
 
     private Packet parseMessage(byte[] message) {
-        if (message[0] != START_BYTE || message[3] != START_BYTE) {
+        byte startByte = appSettings.getStartByte();
+        byte endByte = appSettings.getEndByte();
+
+        if (message[0] != startByte || message[3] != startByte) {
             throw new IllegalArgumentException("Invalid message start bytes");
         }
-        if (message[message.length - 1] != END_BYTE) {
+        if (message[message.length - 1] != endByte) {
             throw new IllegalArgumentException("Invalid message end byte");
         }
         if (!(message[6] == 'C' || message[6] == 'M')) {
@@ -89,18 +91,15 @@ public class PacketService {
         return packet;
     }
 
-    private static byte getOppositeTag(byte tag) {
-        byte opposite;
+    private byte getOppositeTag(byte tag) {
         switch (tag) {
             case 'M':
-                opposite = 'C';
-                break;
+                return 'C';
             case 'C':
-                opposite = 'M';
-                break;
+                return 'M';
             default:
                 throw new IllegalArgumentException("Invalid message tag");
         }
-        return opposite;
     }
 }
+

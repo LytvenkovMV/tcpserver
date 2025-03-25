@@ -1,66 +1,37 @@
 package com.laiz.tcpserver.server;
 
-import com.laiz.tcpserver.enums.MessageTypeEnum;
 import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.service.UILogService;
+import com.laiz.tcpserver.settings.AppSettings;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class TcpServer {
-
-    private static final int NTHREADS = 200;
-    public static final int SO_TIMEOUT = 3000;
-    private static final int DEFAULT_PORT = 2404;
-    private static final byte DEFAULT_END_BYTE = 0x13;
+    private final ExecutorService requestHandlerExecutor;
+    private final AppSettings appSettings;
+    private final TcpRequestHandler tcpRequestHandler;
 
     @Getter
     @Setter
-    private static StateEnum serverState = StateEnum.STOPPED;
-
-    @Getter
-    @Setter
-    private static int port = DEFAULT_PORT;
-
-    @Getter
-    @Setter
-    private static MessageTypeEnum messageType = MessageTypeEnum.STRING;
-
-    @Getter
-    @Setter
-    private static byte endByte = DEFAULT_END_BYTE;
-
-    @Getter
-    @Setter
-    private static boolean addEnter = false;
-
-    private ExecutorService executor;
-
-    @Autowired
-    private TcpRequestHandler handler;
-
-    private static ServerSocket server;
-    private static Socket socket;
+    private StateEnum serverState = StateEnum.STOPPED;
+    private Socket socket;
 
     public void runServer() {
 
-        try {
-            server = new ServerSocket(port);
-            server.setSoTimeout(SO_TIMEOUT);
+        try (ServerSocket server = new ServerSocket(appSettings.getPort())) {
+            server.setSoTimeout(appSettings.getSoTimeout());
             serverState = StateEnum.STARTED;
 
             log.info("Server started. Waiting for the client connection...");
@@ -70,30 +41,26 @@ public class TcpServer {
                 try {
                     socket = server.accept();
 
-                    TcpRequestHandler.setMessageType(messageType);
-                    TcpRequestHandler.setEndByte(endByte);
-                    TcpRequestHandler.setAddEnter(addEnter);
-                    TcpRequestHandler.setThreadState(StateEnum.STARTED);
-                    Runnable task = () -> handler.handleRequest(socket);
+                    tcpRequestHandler.setThreadState(StateEnum.STARTED);
 
-                    executor = Executors.newFixedThreadPool(NTHREADS);
-                    executor.execute(task);
+                    requestHandlerExecutor.execute(() -> tcpRequestHandler.handleRequest(socket));
                 } catch (SocketTimeoutException e) {
                     log.trace("Accept timed out.");
                 }
             }
+        } catch (IOException e) {
+            log.warn("Exception while communication with client", e);
+        } finally {
+            tcpRequestHandler.setThreadState(StateEnum.STOPPED);
 
-            TcpRequestHandler.setThreadState(StateEnum.STOPPED);
-
-            if (socket != null) socket.close();
-            if (executor != null) executor.shutdownNow();
-            server.close();
+            try {
+                if (socket != null) socket.close();
+            } catch (IOException e) {
+                log.warn("Exception while closing the socket", e);
+            }
 
             log.info("Server stopped");
             UILogService.add("TCP сервер", "Остановлен");
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
