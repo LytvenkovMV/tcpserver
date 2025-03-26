@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: "release/v1.0.0"
+      author: "lytvenkovmv"
+      changes:
+        - tagDatabase:
+            tag: release/v1.0.0
+  - include:
+      file: 01.add-packets-table.yml
+      relativeToChangelogFile: true
