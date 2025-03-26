@@ -40,7 +40,7 @@ public class AppSettings {
 
     public void initEndByte(String endByte) {
         try {
-            this.endByte = Byte.parseByte(endByte);
+            this.endByte = Byte.valueOf(endByte, 16);
         } catch (Exception e) {
             log.info("Cannot parse user end of message byte. Using default value");
         }
