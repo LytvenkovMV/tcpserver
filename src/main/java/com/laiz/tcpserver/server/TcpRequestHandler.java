@@ -1,11 +1,9 @@
 package com.laiz.tcpserver.server;
 
-import com.laiz.tcpserver.enums.StateEnum;
 import com.laiz.tcpserver.logger.AppLogger;
 import com.laiz.tcpserver.service.PacketService;
 import com.laiz.tcpserver.settings.AppSettings;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,34 +23,16 @@ public class TcpRequestHandler {
     private final PacketService packetService;
     private final AppSettings settings;
     private final AppLogger logger;
-    @Setter
-    private volatile StateEnum threadState;
 
-    public void handleRequest(Socket socket) {
+    public boolean run(Socket socket) {
+        String threadName = Thread.currentThread().getName();
+        logger.connectionOpened(threadName);
 
-        while (threadState == StateEnum.STARTED) {
-
-            DataInputStream dataInputStream;
-            DataOutputStream dataOutputStream;
-            try {
-                dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-                dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-
-                logger.clientConnected(Thread.currentThread().getName());
-            } catch (IOException e) {
-                log.warn("IOException was thrown during creating socket input/output streams", e);
-                break;
-            }
-
-            byte[] message;
-            try {
-                message = receive(dataInputStream, settings.getStartByte(), settings.getEndByte());
-
-                logger.messageReceived(message, settings.getMessageType(), Thread.currentThread().getName());
-            } catch (IOException e) {
-                log.warn("IOException was thrown during reading from socket", e);
-                break;
-            }
+        byte[] message;
+        try (DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+             DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()))) {
+            message = receive(dataInputStream, settings.getStartByte(), settings.getEndByte());
+            logger.messageReceived(message, settings.getMessageType(), threadName);
 
             List<byte[]> responses = packetService.saveMessageAndGetResponseList(message);
 
@@ -60,17 +40,23 @@ public class TcpRequestHandler {
                 try {
                     send(resp, dataOutputStream);
 
-                    logger.messageSent(resp, settings.getMessageType(), Thread.currentThread().getName());
+                    logger.messageSent(resp, settings.getMessageType(), threadName);
                 } catch (IOException e) {
                     log.warn("Exception was thrown during writing to socket", e);
                 }
             });
+
+            logger.connectionClosed(threadName);
+        } catch (IOException e) {
+            log.warn("Exception was thrown during communication", e);
         }
+
+        return true;
     }
 
     private byte[] receive(DataInputStream dataInputStream, byte start, byte end) throws IOException {
         int length = 0;
-        byte[] bytes = new byte[1000];
+        byte[] buffer = new byte[1000];
         boolean isStart = false;
 
         for (int i = 0; i < 1000; i++) {
@@ -79,7 +65,7 @@ public class TcpRequestHandler {
             if (b == start) isStart = true;
 
             if (isStart) {
-                bytes[length] = b;
+                buffer[length] = b;
                 length++;
 
                 if (b == end) {
@@ -88,7 +74,7 @@ public class TcpRequestHandler {
             }
         }
 
-        return Arrays.copyOf(bytes, length);
+        return Arrays.copyOf(buffer, length);
     }
 
     private void send(byte[] response, DataOutputStream dataOutputStream) throws IOException {

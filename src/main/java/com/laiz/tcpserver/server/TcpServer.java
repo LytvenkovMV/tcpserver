@@ -13,7 +13,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -23,11 +27,11 @@ public class TcpServer {
     private final AppSettings settings;
     private final AppLogger logger;
     private final TcpRequestHandler tcpRequestHandler;
-
+    private final List<Future<Boolean>> requestHandlerFutures = new CopyOnWriteArrayList<>();
     @Getter
     @Setter
     private volatile StateEnum serverState = StateEnum.STOPPED;
-    private Socket socket;
+    private volatile Socket socket;
 
     public boolean runServer() {
 
@@ -37,13 +41,12 @@ public class TcpServer {
 
             logger.serverStarted();
 
-            while (serverState != StateEnum.STOPPED) {
+            while (serverState == StateEnum.STARTED) {
                 try {
                     socket = server.accept();
 
-                    tcpRequestHandler.setThreadState(StateEnum.STARTED);
-
-                    requestHandlerExecutor.submit(() -> tcpRequestHandler.handleRequest(socket));
+                    Future<Boolean> future = requestHandlerExecutor.submit(() -> tcpRequestHandler.run(socket));
+                    requestHandlerFutures.add(future);
                 } catch (SocketTimeoutException e) {
                     log.trace("Accept timed out.");
                 }
@@ -52,7 +55,13 @@ public class TcpServer {
             log.warn("Exception while communication with client", e);
         } finally {
             try {
-                tcpRequestHandler.setThreadState(StateEnum.STOPPED);
+                requestHandlerFutures.forEach(f -> {
+                    try {
+                        f.get(10, TimeUnit.SECONDS);
+                    } catch (Exception e) {
+                        log.warn("Exception while stopping the request handlers", e);
+                    }
+                });
 
                 if (socket != null) socket.close();
 

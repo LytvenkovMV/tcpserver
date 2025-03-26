@@ -30,18 +30,25 @@ public class AppLogger {
         UILogService.add("TCP сервер", "Остановлен");
     }
 
-    public void clientConnected(String threadName) {
+    public void connectionOpened(String threadName) {
         String threadNum = threadName.split("-")[3];
 
-        log.info("Client connected. Waiting for message...");
+        log.info("Connection #{} opened. Client connected. Waiting for message...", threadNum);
         UILogService.add("Соединение № " + threadNum, "Клиент подключен. Сервер ждет сообщение...");
+    }
+
+    public void connectionClosed(String threadName) {
+        String threadNum = threadName.split("-")[3];
+
+        log.info("Connection #{} closed", threadNum);
+        UILogService.add("Соединение № " + threadNum, "Соединение закрыто");
     }
 
     public void messageReceived(byte[] message, MessageTypeEnum messageType, String threadName) {
         String threadNum = threadName.split("-")[3];
         String content = messageToString(message, messageType);
 
-        log.info("Message received. Message content: " + content);
+        log.info("Connection #{}: Message received. Message content: {}", threadNum, content);
         UILogService.add("Соединение № " + threadNum, "Сообщение получено. Его содержание: " + content);
     }
 
@@ -49,21 +56,21 @@ public class AppLogger {
         String threadNum = threadName.split("-")[3];
         String content = messageToString(message, messageType);
 
-        log.info("Response sent. Response content: " + content);
+        log.info("Connection #{}: Response sent. Response content: {}", threadNum, content);
         UILogService.add("Соединение № " + threadNum, "Ответ отправлен. Его содержание: " + content);
     }
 
     public void inputMessageParsed(String threadName) {
         String threadNum = threadName.split("-")[3];
 
-        log.info("Input message parsed successfully");
+        log.info("Connection #{}: Input message parsed successfully", threadNum);
         UILogService.add("Соединение № " + threadNum, "Сообщение прочитано успешно");
     }
 
     public void inputMessageSaved(String threadName) {
         String threadNum = threadName.split("-")[3];
 
-        log.info("Input message saved in DB");
+        log.info("Connection #{}: Input message saved in DB", threadNum);
         UILogService.add("Соединение № " + threadNum, "Сообщение сохранено в БД");
     }
 
@@ -71,7 +78,7 @@ public class AppLogger {
         String threadNum = threadName.split("-")[3];
         String content = messageToString(message, messageType);
 
-        log.info("Response found in DB. Response content: " + content);
+        log.info("Connection #{}: Response found in DB. Response content: {}", threadNum, content);
         UILogService.add("Соединение № " + threadNum, "Ответ найден в БД. Его содержание: " + content);
     }
 
