@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: "01.add-packets-table"
+      author: "lytvenkovmv"
+      changes:
+        - createTable:
+            tableName: packets
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: kp_address
+                  type: int2
+              - column:
+                  name: tag
+                  type: int2
+              - column:
+                  name: data
+                  type: bytea
+              - column:
+                  name: opt_lock
+                  type: bigint
