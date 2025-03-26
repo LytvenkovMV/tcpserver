@@ -69,7 +69,7 @@ public class PacketService {
 
     private Packet messageToPacket(byte[] message, byte start, byte end) {
         if (Objects.isNull(message)) {
-            throw new IllegalArgumentException("Cannot parse input message. Message is null");
+            throw new IllegalArgumentException("Cannot parse input message. Message is empty");
         }
         if (message.length < 9) {
             throw new IllegalArgumentException("Cannot parse input message. Invalid message length");
