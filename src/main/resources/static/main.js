@@ -32,7 +32,7 @@ buttonDefault.onclick = () => {
     inputIpByte1.value = 0
     inputIpByte0.value = 1
     inputPort.value = 2404
-    inputEndOfMessage.value = 13
+    inputEndOfMessage.value = 16
 }
 
 
