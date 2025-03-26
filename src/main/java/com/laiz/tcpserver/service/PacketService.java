@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.LockModeType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,7 +42,7 @@ public class PacketService {
             log.warn("Retry after transaction rollback. Attempt #{}", RetrySynchronizationManager.getContext().getRetryCount() + 1);
         }
 
-        Packet packet = parseMessage(message);
+        Packet packet = messageToPacket(message, settings.getStartByte(), settings.getEndByte());
         logger.inputMessageParsed(threadName);
 
         repository.save(packet);
@@ -61,23 +62,26 @@ public class PacketService {
 
     @Recover
     public List<byte[]> recoverMethod(RuntimeException e, byte[] message) {
-        log.warn("Retrying finished unsuccessfully. Begin recovering");
+        log.error("Retrying finished unsuccessfully with reason: {}", e.getMessage(), e);
 
         return new ArrayList<>();
     }
 
-    private Packet parseMessage(byte[] message) {
-        byte startByte = settings.getStartByte();
-        byte endByte = settings.getEndByte();
-
-        if (message[0] != startByte || message[3] != startByte) {
-            throw new IllegalArgumentException("Invalid message start bytes");
+    private Packet messageToPacket(byte[] message, byte start, byte end) {
+        if (Objects.isNull(message)) {
+            throw new IllegalArgumentException("Cannot parse input message. Message is null");
         }
-        if (message[message.length - 1] != endByte) {
-            throw new IllegalArgumentException("Invalid message end byte");
+        if (message.length < 9) {
+            throw new IllegalArgumentException("Cannot parse input message. Invalid message length");
+        }
+        if (message[0] != start || message[3] != start) {
+            throw new IllegalArgumentException("Cannot parse input message. Invalid start bytes");
+        }
+        if (message[message.length - 1] != end) {
+            throw new IllegalArgumentException("Cannot parse input message. Invalid end byte");
         }
         if (!(message[6] == 'C' || message[6] == 'M')) {
-            throw new IllegalArgumentException("Invalid message tag");
+            throw new IllegalArgumentException("Cannot parse input message. Invalid tag");
         }
 
         Packet packet = new Packet();
