@@ -1,7 +1,7 @@
 package com.laiz.tcpserver.server;
 
 import com.laiz.tcpserver.enums.StateEnum;
-import com.laiz.tcpserver.service.UILogService;
+import com.laiz.tcpserver.logger.AppLogger;
 import com.laiz.tcpserver.settings.AppSettings;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,22 +20,22 @@ import java.util.concurrent.ExecutorService;
 @RequiredArgsConstructor
 public class TcpServer {
     private final ExecutorService requestHandlerExecutor;
-    private final AppSettings appSettings;
+    private final AppSettings settings;
+    private final AppLogger logger;
     private final TcpRequestHandler tcpRequestHandler;
 
     @Getter
     @Setter
-    private StateEnum serverState = StateEnum.STOPPED;
+    private volatile StateEnum serverState = StateEnum.STOPPED;
     private Socket socket;
 
-    public void runServer() {
+    public boolean runServer() {
 
-        try (ServerSocket server = new ServerSocket(appSettings.getPort())) {
-            server.setSoTimeout(appSettings.getSoTimeout());
+        try (ServerSocket server = new ServerSocket(settings.getPort())) {
+            server.setSoTimeout(settings.getSoTimeout());
             serverState = StateEnum.STARTED;
 
-            log.info("Server started. Waiting for the client connection...");
-            UILogService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
+            logger.serverStarted();
 
             while (serverState != StateEnum.STOPPED) {
                 try {
@@ -43,7 +43,7 @@ public class TcpServer {
 
                     tcpRequestHandler.setThreadState(StateEnum.STARTED);
 
-                    requestHandlerExecutor.execute(() -> tcpRequestHandler.handleRequest(socket));
+                    requestHandlerExecutor.submit(() -> tcpRequestHandler.handleRequest(socket));
                 } catch (SocketTimeoutException e) {
                     log.trace("Accept timed out.");
                 }
@@ -51,16 +51,17 @@ public class TcpServer {
         } catch (IOException e) {
             log.warn("Exception while communication with client", e);
         } finally {
-            tcpRequestHandler.setThreadState(StateEnum.STOPPED);
-
             try {
-                if (socket != null) socket.close();
-            } catch (IOException e) {
-                log.warn("Exception while closing the socket", e);
-            }
+                tcpRequestHandler.setThreadState(StateEnum.STOPPED);
 
-            log.info("Server stopped");
-            UILogService.add("TCP сервер", "Остановлен");
+                if (socket != null) socket.close();
+
+                logger.serverStopped();
+            } catch (Exception e) {
+                log.warn("Exception while stopping the server", e);
+            }
         }
+
+        return true;
     }
 }

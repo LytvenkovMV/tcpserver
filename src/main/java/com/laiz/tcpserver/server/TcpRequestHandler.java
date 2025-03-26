@@ -1,8 +1,8 @@
 package com.laiz.tcpserver.server;
 
 import com.laiz.tcpserver.enums.StateEnum;
+import com.laiz.tcpserver.logger.AppLogger;
 import com.laiz.tcpserver.service.PacketService;
-import com.laiz.tcpserver.service.UILogService;
 import com.laiz.tcpserver.settings.AppSettings;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,7 +15,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,9 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TcpRequestHandler {
     private final PacketService packetService;
-    private final AppSettings appSettings;
+    private final AppSettings settings;
+    private final AppLogger logger;
     @Setter
-    private StateEnum threadState;
+    private volatile StateEnum threadState;
 
     public void handleRequest(Socket socket) {
 
@@ -37,79 +37,68 @@ public class TcpRequestHandler {
             try {
                 dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
                 dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+
+                logger.clientConnected(Thread.currentThread().getName());
             } catch (IOException e) {
                 log.warn("IOException was thrown during creating socket input/output streams", e);
                 break;
             }
 
-            log.info("Client connected. Waiting for message...");
-            UILogService.add("Соединение № " + Thread.currentThread().getId(), "Клиент подключен. Сервер ждет сообщение...");
-
-            int messageLength = 0;
-            byte[] inputBytes = new byte[1000];
-            byte startByte = appSettings.getStartByte();
-            byte endByte = appSettings.getEndByte();
-            boolean isStart = false;
-
+            byte[] message;
             try {
-                for (int i = 0; i < 1000; i++) {
-                    byte inputByte = dataInputStream.readByte();
-                    if (inputByte == startByte) isStart = true;
-                    if (isStart) {
-                        inputBytes[messageLength] = inputByte;
-                        messageLength++;
-                        if (inputByte == endByte) break;
-                    }
-                }
-            } catch (Exception e) {
+                message = receive(dataInputStream, settings.getStartByte(), settings.getEndByte());
+
+                logger.messageReceived(message, settings.getMessageType(), Thread.currentThread().getName());
+            } catch (IOException e) {
                 log.warn("IOException was thrown during reading from socket", e);
                 break;
             }
 
-            byte[] message = Arrays.copyOf(inputBytes, messageLength);
+            List<byte[]> responses = packetService.saveMessageAndGetResponseList(message);
 
-            String rxMessageContent = getMessageContent(message);
-            log.info("Message received. Message content: " + rxMessageContent);
-            UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение получено. Его содержание: " + rxMessageContent);
-
-            List<byte[]> responseMessages = packetService.saveMessageAndGetResponseList(message);
-
-            if (!responseMessages.isEmpty()) {
+            responses.forEach(resp -> {
                 try {
-                    for (byte[] m : responseMessages) {
-                        dataOutputStream.write(m);
-                        if (appSettings.isAddEnter()) {
-                            dataOutputStream.write(13);
-                            dataOutputStream.write(10);
-                        }
-                        dataOutputStream.flush();
+                    send(resp, dataOutputStream);
 
-                        String txMessageContent = getMessageContent(message);
-                        log.info("Response sent. Response content: " + txMessageContent);
-                        UILogService.add("Соединение № " + Thread.currentThread().getId(), "Ответ отправлен. Его содержание: " + txMessageContent);
-                    }
-                } catch (Exception e) {
-                    log.warn("IOException was thrown during writing to socket", e);
+                    logger.messageSent(resp, settings.getMessageType(), Thread.currentThread().getName());
+                } catch (IOException e) {
+                    log.warn("Exception was thrown during writing to socket", e);
+                }
+            });
+        }
+    }
+
+    private byte[] receive(DataInputStream dataInputStream, byte start, byte end) throws IOException {
+        int length = 0;
+        byte[] bytes = new byte[1000];
+        boolean isStart = false;
+
+        for (int i = 0; i < 1000; i++) {
+            byte b = dataInputStream.readByte();
+
+            if (b == start) isStart = true;
+
+            if (isStart) {
+                bytes[length] = b;
+                length++;
+
+                if (b == end) {
                     break;
                 }
             }
         }
+
+        return Arrays.copyOf(bytes, length);
     }
 
-    private String getMessageContent(byte[] message) {
-        switch (appSettings.getMessageType()) {
-            case BYTES:
-                StringBuilder stringBuilder = new StringBuilder();
-                for (byte messageByte : message) {
-                    String strByte = String.format("%02X ", messageByte);
-                    stringBuilder.append(strByte);
-                }
-                return stringBuilder.toString().trim();
-            case STRING:
-                return new String(message, StandardCharsets.UTF_8);
-            default:
-                return "";
+    private void send(byte[] response, DataOutputStream dataOutputStream) throws IOException {
+        dataOutputStream.write(response);
+
+        if (settings.isAddEnter()) {
+            dataOutputStream.write(13);
+            dataOutputStream.write(10);
         }
+        dataOutputStream.flush();
     }
 }
 

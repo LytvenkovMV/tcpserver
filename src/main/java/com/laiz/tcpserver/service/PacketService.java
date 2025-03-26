@@ -1,6 +1,7 @@
 package com.laiz.tcpserver.service;
 
 import com.laiz.tcpserver.entity.Packet;
+import com.laiz.tcpserver.logger.AppLogger;
 import com.laiz.tcpserver.repository.PacketRepository;
 import com.laiz.tcpserver.settings.AppSettings;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PacketService {
-    private final AppSettings appSettings;
+    private final AppSettings settings;
+    private final AppLogger logger;
     private final PacketRepository repository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW,
@@ -32,32 +34,27 @@ public class PacketService {
             recover = "recoverMethod")
     @Lock(LockModeType.OPTIMISTIC)
     public List<byte[]> saveMessageAndGetResponseList(byte[] message) {
+        String threadName = Thread.currentThread().getName();
+
         int retryCount = RetrySynchronizationManager.getContext().getRetryCount();
         if (retryCount > 0) {
             log.warn("Retry after transaction rollback. Attempt #{}", RetrySynchronizationManager.getContext().getRetryCount() + 1);
         }
 
         Packet packet = parseMessage(message);
-
-        log.info("Input message parsed successfully");
-        UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение прочитано успешно");
+        logger.inputMessageParsed(threadName);
 
         repository.save(packet);
-
-        log.info("Input message saved");
-        UILogService.add("Соединение № " + Thread.currentThread().getId(), "Сообщение сохранено в БД");
+        logger.inputMessageSaved(threadName);
 
         List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), getOppositeTag(packet.getTag()));
-        List<byte[]> responseMessages = new ArrayList<>();
-        if (responsePackets != null && (!responsePackets.isEmpty())) {
-            responseMessages = responsePackets.stream()
-                    .map(Packet::getData)
-                    .collect(Collectors.toList());
-            repository.deleteAll(responsePackets);
-        }
 
-        log.info("Found " + responseMessages.size() + " output messages");
-        UILogService.add("Соединение № " + Thread.currentThread().getId(), "Найдено " + responseMessages.size() + " сообщений для ответа");
+        List<byte[]> responseMessages = responsePackets.stream()
+                .map(Packet::getData)
+                .peek(resp -> logger.responseFound(resp, settings.getMessageType(), threadName))
+                .collect(Collectors.toList());
+
+        repository.deleteAll(responsePackets);
 
         return responseMessages;
     }
@@ -70,8 +67,8 @@ public class PacketService {
     }
 
     private Packet parseMessage(byte[] message) {
-        byte startByte = appSettings.getStartByte();
-        byte endByte = appSettings.getEndByte();
+        byte startByte = settings.getStartByte();
+        byte endByte = settings.getEndByte();
 
         if (message[0] != startByte || message[3] != startByte) {
             throw new IllegalArgumentException("Invalid message start bytes");

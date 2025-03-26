@@ -9,11 +9,11 @@ spring:
 
 logging:
   level:
-   com.laiz.tcpserver: debug
-   org:
-    springframework:
-      orm.jpa: DEBUG
-      transaction: debug
-    hibernate:
-      SQL: debug
-      type.descriptor.sql.BasicBinder: info
+    com.laiz.tcpserver: info
+    org:
+      springframework:
+        orm.jpa: info
+        transaction: info
+      hibernate:
+        SQL: info
+        type.descriptor.sql.BasicBinder: info
