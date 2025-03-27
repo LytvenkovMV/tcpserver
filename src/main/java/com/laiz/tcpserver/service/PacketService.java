@@ -35,24 +35,24 @@ public class PacketService {
             recover = "recoverMethod")
     @Lock(LockModeType.OPTIMISTIC)
     public List<byte[]> saveMessageAndGetResponseList(byte[] message) {
-        String threadName = Thread.currentThread().getName();
+        String threadNum = logger.getThreadNum(Thread.currentThread());
 
         int retryCount = RetrySynchronizationManager.getContext().getRetryCount();
         if (retryCount > 0) {
-            log.warn("Retry after transaction rollback. Attempt #{}", RetrySynchronizationManager.getContext().getRetryCount() + 1);
+            log.warn("Connection #{}: Retry after transaction rollback. Attempt #{}", threadNum, retryCount + 1);
         }
 
         Packet packet = messageToPacket(message, settings.getStartByte(), settings.getEndByte());
-        logger.inputMessageParsed(threadName);
+        logger.inputMessageParsed(threadNum);
 
         repository.save(packet);
-        logger.inputMessageSaved(threadName);
+        logger.inputMessageSaved(threadNum);
 
         List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), getOppositeTag(packet.getTag()));
 
         List<byte[]> responseMessages = responsePackets.stream()
                 .map(Packet::getData)
-                .peek(resp -> logger.responseFound(resp, settings.getMessageType(), threadName))
+                .peek(resp -> logger.responseFound(resp, settings.getMessageType(), threadNum))
                 .collect(Collectors.toList());
 
         repository.deleteAll(responsePackets);
@@ -62,7 +62,7 @@ public class PacketService {
 
     @Recover
     public List<byte[]> recoverMethod(RuntimeException e, byte[] message) {
-        log.error("Retrying finished unsuccessfully with reason: {}", e.getMessage(), e);
+        log.error("Connection #{}: Retrying finished unsuccessfully with reason: {}", logger.getThreadNum(Thread.currentThread()), e.getMessage(), e);
 
         return new ArrayList<>();
     }

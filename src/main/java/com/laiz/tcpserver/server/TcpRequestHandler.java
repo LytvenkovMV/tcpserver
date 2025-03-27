@@ -25,14 +25,14 @@ public class TcpRequestHandler {
     private final AppLogger logger;
 
     public boolean run(Socket socket) {
-        String threadName = Thread.currentThread().getName();
-        logger.connectionOpened(threadName);
+        String threadNum = logger.getThreadNum(Thread.currentThread());
+        logger.connectionOpened(threadNum);
 
         byte[] message;
         try (DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
              DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()))) {
             message = receive(dataInputStream, settings.getStartByte(), settings.getEndByte());
-            logger.messageReceived(message, settings.getMessageType(), threadName);
+            logger.messageReceived(message, settings.getMessageType(), threadNum);
 
             List<byte[]> responses = packetService.saveMessageAndGetResponseList(message);
 
@@ -40,15 +40,15 @@ public class TcpRequestHandler {
                 try {
                     send(resp, dataOutputStream);
 
-                    logger.messageSent(resp, settings.getMessageType(), threadName);
+                    logger.messageSent(resp, settings.getMessageType(), threadNum);
                 } catch (IOException e) {
-                    log.warn("Exception was thrown during writing to socket", e);
+                    log.warn("Connection #{}: Exception was thrown during writing to socket", threadNum, e);
                 }
             });
 
-            logger.connectionClosed(threadName);
+            logger.connectionClosed(threadNum);
         } catch (IOException e) {
-            log.warn("Exception was thrown during communication", e);
+            log.warn("Connection #{}: Exception was thrown during communication", threadNum, e);
         }
 
         return true;
