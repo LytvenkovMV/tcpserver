@@ -19,6 +19,7 @@ import javax.persistence.LockModeType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,22 +43,25 @@ public class PacketService {
             log.warn("Connection #{}: Retry after transaction rollback. Attempt #{}", threadNum, retryCount + 1);
         }
 
-        Packet packet = messageToPacket(message, settings.getStartByte(), settings.getEndByte());
+        Packet inputPacket = messageToPacket(message, settings.getStartByte(), settings.getEndByte());
         logger.inputMessageParsed(threadNum);
 
-        repository.save(packet);
+        repository.save(inputPacket);
         logger.inputMessageSaved(threadNum);
 
-        List<Packet> responsePackets = repository.findPacketsByKpAddressAndTag(packet.getKpAddress(), getOppositeTag(packet.getTag()));
+        Optional<Packet> optResponsePacket = repository.findFirstByKpAddressAndTag(inputPacket.getKpAddress(), getOppositeTag(inputPacket.getTag()));
 
-        List<byte[]> responseMessages = responsePackets.stream()
-                .map(Packet::getData)
-                .peek(resp -> logger.responseFound(resp, settings.getMessageType(), threadNum))
-                .collect(Collectors.toList());
+        if(optResponsePacket.isPresent()) {
+            Packet responsePacket = optResponsePacket.get();
 
-        repository.deleteAll(responsePackets);
+            logger.responseFound(responsePacket.getData(), settings.getMessageType(), threadNum);
 
-        return responseMessages;
+            repository.delete(responsePacket);
+
+            return List.of(responsePacket.getData());
+        }
+
+        return List.of();
     }
 
     @Recover
