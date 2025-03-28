@@ -14,6 +14,7 @@ const btnCheckAddEnter = document.querySelector('#btn-check-add-enter')
 const outputTable = document.querySelector('#output-table')
 let timerID
 let rowIndex = 0
+const maxRowsInTable = 1000
 
 
 buttonClear.onclick = () => {
@@ -48,9 +49,9 @@ buttonStartServer.onclick = () => {
 
     if (radioBytesMode.checked) messageMode = 'bytes'
     if (btnCheckAddEnter.checked) addEnter = '1'
-    if (port.length > 0) searchParams.append('p',port)
-    if (endOfMessage.length > 0) searchParams.append('e',endOfMessage)
-    searchParams.append('a',addEnter)
+    if (port.length > 0) searchParams.append('p', port)
+    if (endOfMessage.length > 0) searchParams.append('e', endOfMessage)
+    searchParams.append('a', addEnter)
 
     console.log(`Start server request at ${serverIp} address...`)
 
@@ -93,7 +94,7 @@ buttonClearLog.onclick = () => {
 }
 
 
-timerID = setInterval(getData, 2500)
+timerID = setInterval(getData, 500)
 console.log('Data receiving started!')
 
 
@@ -130,6 +131,11 @@ function showData(row1Data, row2Data, row3Data) {
     cell1.innerText = row1Data;
     cell2.innerText = row2Data;
     cell3.innerText = row3Data;
+
+    while (rowIndex > maxRowsInTable) {
+        outputTable.deleteRow(1);
+        rowIndex--;
+    }
 }
 
 

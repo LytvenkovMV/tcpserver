@@ -3,7 +3,11 @@ package com.laiz.tcpserver.entity;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "packets")
@@ -14,16 +18,13 @@ public class Packet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "kp_address")
+    String connNum;
+
     byte kpAddress;
 
-    @Column(name = "tag")
     byte tag;
 
-    @Column(name = "data")
     byte[] data;
 
-    @Version
-    @Column(name = "opt_lock")
-    long version;
+    long optLock;
 }

@@ -10,69 +10,65 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Component
 public class AppLogger {
-    public String getThreadNum(Thread currThread) {
-        return currThread.getName().split("-")[3];
-    }
-
     public void serverStarting() {
-        log.info("Starting server...");
+        log.debug("Starting server...");
         UILogService.add("TCP сервер", "Запускается...");
     }
 
     public void serverStopping() {
-        log.info("Stopping server...");
+        log.debug("Stopping server...");
         UILogService.add("TCP сервер", "Останавливается...");
     }
 
     public void serverStarted() {
-        log.info("Server started. Waiting for the client connection...");
+        log.debug("Server started. Waiting for the client connection...");
         UILogService.add("TCP сервер", "Запущен. Ждет подключения клиента...");
     }
 
     public void serverStopped() {
-        log.info("Server stopped");
+        log.debug("Server stopped");
         UILogService.add("TCP сервер", "Остановлен");
     }
 
-    public void connectionOpened(String threadNum) {
-        log.info("Connection #{} opened. Client connected. Waiting for message...", threadNum);
-        UILogService.add("Соединение № " + threadNum, "Клиент подключен. Сервер ждет сообщение...");
+    public void connectionOpened(String connNum) {
+        log.debug("Connection #{} opened. Client connected. Waiting for message...", connNum);
+        UILogService.add("Соединение № " + connNum, "Клиент подключен. Сервер ждет сообщение...");
     }
 
-    public void connectionClosed(String threadNum) {
-        log.info("Connection #{} closed", threadNum);
-        UILogService.add("Соединение № " + threadNum, "Соединение закрыто");
+    public void connectionClosed(String connNum) {
+        log.debug("Connection #{} closed", connNum);
+        UILogService.add("Соединение № " + connNum, "Соединение закрыто");
     }
 
-    public void messageReceived(byte[] message, MessageTypeEnum messageType, String threadNum) {
+    public void messageReceived(byte[] message, MessageTypeEnum messageType, String connNum) {
         String content = messageToString(message, messageType);
 
-        log.info("Connection #{}: Message received. Message content: {}", threadNum, content);
-        UILogService.add("Соединение № " + threadNum, "Сообщение получено. Его содержание: " + content);
+        log.debug("Connection #{}: Message received. Message content: {}", connNum, content);
+        UILogService.add("Соединение № " + connNum, "Сообщение получено. Его содержание: " + content);
     }
 
-    public void messageSent(byte[] message, MessageTypeEnum messageType, String threadNum) {
+    public void messageSent(byte[] message, MessageTypeEnum messageType, String connNum) {
         String content = messageToString(message, messageType);
 
-        log.info("Connection #{}: Response sent. Response content: {}", threadNum, content);
-        UILogService.add("Соединение № " + threadNum, "Ответ отправлен. Его содержание: " + content);
+        log.debug("Connection #{}: Response sent. Response content: {}", connNum, content);
+        UILogService.add("Соединение № " + connNum, "Ответ отправлен. Его содержание: " + content);
     }
 
-    public void inputMessageParsed(String threadNum) {
-        log.info("Connection #{}: Input message parsed successfully", threadNum);
-        UILogService.add("Соединение № " + threadNum, "Сообщение прочитано успешно");
+    public void inputMessageParsed(String connNum) {
+        log.debug("Connection #{}: Input message parsed successfully", connNum);
+        UILogService.add("Соединение № " + connNum, "Сообщение прочитано успешно");
     }
 
-    public void inputMessageSaved(String threadNum) {
-        log.info("Connection #{}: Input message saved in DB", threadNum);
-        UILogService.add("Соединение № " + threadNum, "Сообщение сохранено в БД");
+    public void inputMessageSaved(String connNum) {
+        log.debug("Connection #{}: Input message saved in DB", connNum);
+        UILogService.add("Соединение № " + connNum, "Сообщение сохранено в БД");
     }
 
-    public void responseFound(byte[] message, MessageTypeEnum messageType, String threadNum) {
+    public void responseFound(byte[] message, MessageTypeEnum messageType, String connNum) {
         String content = messageToString(message, messageType);
 
-        log.info("Connection #{}: Response found in DB. Response content: {}", threadNum, content);
-        UILogService.add("Соединение № " + threadNum, "Ответ найден в БД. Его содержание: " + content);
+        log.debug("Connection #{}: Response found in DB. Response content: {}", connNum, content);
+        UILogService.add("Соединение № " + connNum, "Ответ найден в БД. Его содержание: " + content);
     }
 
     private String messageToString(byte[] message, MessageTypeEnum messageType) {

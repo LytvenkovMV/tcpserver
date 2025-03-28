@@ -1,8 +1,10 @@
 package com.laiz.tcpserver.server;
 
+import com.laiz.tcpserver.entity.Packet;
 import com.laiz.tcpserver.logger.AppLogger;
 import com.laiz.tcpserver.service.PacketService;
 import com.laiz.tcpserver.settings.AppSettings;
+import com.laiz.tcpserver.util.PacketUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,41 +16,47 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class TcpRequestHandler {
     private final PacketService packetService;
+    private final PacketUtil packetUtil;
     private final AppSettings settings;
     private final AppLogger logger;
 
-    public boolean run(Socket socket) {
-        String threadNum = logger.getThreadNum(Thread.currentThread());
-        logger.connectionOpened(threadNum);
+    public boolean run(Socket socket, String connNum) {
+        logger.connectionOpened(connNum);
 
         byte[] message;
         try (DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
              DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()))) {
             message = receive(dataInputStream, settings.getStartByte(), settings.getEndByte());
-            logger.messageReceived(message, settings.getMessageType(), threadNum);
+            logger.messageReceived(message, settings.getMessageType(), connNum);
 
-            List<byte[]> responses = packetService.saveMessageAndGetResponseList(message);
+            Packet inputPacket = packetUtil.messageToPacket(message, settings.getStartByte(), settings.getEndByte(), connNum);
+            logger.inputMessageParsed(connNum);
 
-            responses.forEach(resp -> {
-                try {
-                    send(resp, dataOutputStream);
+            packetService.save(inputPacket);
+            logger.inputMessageSaved(connNum);
 
-                    logger.messageSent(resp, settings.getMessageType(), threadNum);
-                } catch (IOException e) {
-                    log.warn("Connection #{}: Exception was thrown during writing to socket", threadNum, e);
-                }
-            });
+            byte kpAddress = inputPacket.getKpAddress();
+            byte oppositeTag = packetUtil.getOppositeTag(inputPacket.getTag());
 
-            logger.connectionClosed(threadNum);
+            Optional<Packet> responseOpt = packetService.findFirst(kpAddress, oppositeTag, connNum);
+            if (responseOpt.isPresent()) {
+                byte[] responseMessage = packetUtil.packetToMessage(responseOpt.get());
+                logger.responseFound(responseMessage, settings.getMessageType(), connNum);
+
+                send(responseMessage, dataOutputStream);
+                logger.messageSent(responseMessage, settings.getMessageType(), connNum);
+            }
+
+            logger.connectionClosed(connNum);
         } catch (IOException e) {
-            log.warn("Connection #{}: Exception was thrown during communication", threadNum, e);
+            log.warn("Connection #{}: Exception was thrown during communication", connNum, e);
         }
 
         return true;

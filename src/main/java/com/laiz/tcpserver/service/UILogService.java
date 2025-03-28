@@ -5,13 +5,12 @@ import com.laiz.tcpserver.dao.UiLogRecord;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class UILogService {
 
-    private static final ArrayBlockingQueue<UiLogRecord> UI_LOG_RECORDS = new ArrayBlockingQueue<>(10000);
+    private static final ArrayBlockingQueue<UiLogRecord> UI_LOG_RECORDS = new ArrayBlockingQueue<>(100000);
 
     public static void add(String source, String information) {
         LocalTime localTime = java.time.LocalTime.now();

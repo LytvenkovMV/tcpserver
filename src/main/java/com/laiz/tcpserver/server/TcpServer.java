@@ -38,6 +38,7 @@ public class TcpServer {
         try (ServerSocket server = new ServerSocket(settings.getPort())) {
             server.setSoTimeout(settings.getSoTimeout());
             serverState = StateEnum.STARTED;
+            long connNum = 1L;
 
             logger.serverStarted();
 
@@ -45,8 +46,10 @@ public class TcpServer {
                 try {
                     socket = server.accept();
 
-                    Future<Boolean> future = requestHandlerExecutor.submit(() -> tcpRequestHandler.run(socket));
+                    String connNumStr = String.valueOf(connNum);
+                    Future<Boolean> future = requestHandlerExecutor.submit(() -> tcpRequestHandler.run(socket, connNumStr));
                     requestHandlerFutures.add(future);
+                    connNum++;
                 } catch (SocketTimeoutException e) {
                     log.trace("Accept timed out.");
                 }

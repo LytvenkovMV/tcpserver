@@ -12,6 +12,9 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
               - column:
+                  name: conn_num
+                  type: varchar
+              - column:
                   name: kp_address
                   type: int2
               - column:
@@ -23,3 +26,13 @@ databaseChangeLog:
               - column:
                   name: opt_lock
                   type: bigint
+  - changeSet:
+      id: "add-kp-address-index"
+      author: "lytvenkovmv"
+      changes:
+        - createIndex:
+            indexName: kp_address_idx
+            tableName: packets
+            columns:
+              - column:
+                  name: kp_address

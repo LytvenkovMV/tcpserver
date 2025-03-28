@@ -5,13 +5,11 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Controller Thread Group">
-        <intProp name="ThreadGroup.num_threads">500</intProp>
-        <intProp name="ThreadGroup.ramp_time">5</intProp>
+        <intProp name="ThreadGroup.num_threads">2000</intProp>
+        <intProp name="ThreadGroup.ramp_time">100</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
@@ -20,19 +18,6 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <TCPSampler guiclass="TCPSamplerGui" testclass="TCPSampler" testname="TCP Sampler" enabled="false">
-          <stringProp name="TCPSampler.server">127.0.0.1</stringProp>
-          <boolProp name="TCPSampler.reUseConnection">false</boolProp>
-          <stringProp name="TCPSampler.port">2404</stringProp>
-          <boolProp name="TCPSampler.nodelay">false</boolProp>
-          <stringProp name="TCPSampler.timeout">30000</stringProp>
-          <stringProp name="TCPSampler.ctimeout">30000</stringProp>
-          <stringProp name="TCPSampler.request">\x68\x02\x02\x68\x00\x00\x4d\x00\x00\x00\x16 </stringProp>
-          <stringProp name="TCPSampler.EolByte">32</stringProp>
-          <stringProp name="ConfigTestElement.username"></stringProp>
-          <stringProp name="ConfigTestElement.password"></stringProp>
-        </TCPSampler>
-        <hashTree/>
         <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
@@ -43,24 +28,49 @@ String hostname = &quot;localhost&quot;
 int port = 2404
 byte[] byteArray = [0x68, 0x02, 0x02, 0x68, 0x00, 0x00, 0x4d, 0x00, 0x00, 0x00, 0x16] as byte[]
 
-def socket = new Socket(hostname, port)
-def out = socket.getOutputStream()
-out.write(byteArray)
-out.flush()
-
-def in = socket.getInputStream()
-byte[] response = new byte[1024]
-int bytesRead = in.read(response)
-log.info(&quot;Received: &quot; + new String(response, 0, bytesRead))
-
-//socket.close()</stringProp>
+try {
+    def socket = new Socket(hostname, port)
+    try {
+        // Send request
+        def out = socket.getOutputStream()
+        out.write(byteArray)
+        out.flush()
+        
+        // Receive response
+        def in = socket.getInputStream()
+        byte[] response = new byte[1024]
+        int bytesRead = in.read(response)
+        
+        if (bytesRead == -1) {
+            log.warn(&quot;No data received from server&quot;)
+            SampleResult.setSuccessful(false)
+            SampleResult.setResponseMessage(&quot;No response received from server&quot;)
+        } else {
+            String responseStr = new String(response, 0, bytesRead)
+            log.info(&quot;Received: &quot; + responseStr)
+            SampleResult.setResponseData(responseStr, &quot;UTF-8&quot;)
+            SampleResult.setSuccessful(true)
+        }
+    } catch (Exception e) {
+        log.error(&quot;Error during communication: &quot; + e.getMessage(), e)
+        SampleResult.setSuccessful(false)
+        SampleResult.setResponseMessage(e.getMessage())
+    } finally {
+        socket.close()
+    }
+} catch (ConnectException e) {
+    log.error(&quot;Connection failed: &quot; + e.getMessage(), e)
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Connection failed: &quot; + e.getMessage())
+}
+</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
         <hashTree/>
       </hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Scada Thread Group">
-        <intProp name="ThreadGroup.num_threads">500</intProp>
-        <intProp name="ThreadGroup.ramp_time">5</intProp>
+        <intProp name="ThreadGroup.num_threads">2000</intProp>
+        <intProp name="ThreadGroup.ramp_time">100</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
@@ -69,19 +79,6 @@ log.info(&quot;Received: &quot; + new String(response, 0, bytesRead))
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <TCPSampler guiclass="TCPSamplerGui" testclass="TCPSampler" testname="TCP Sampler" enabled="false">
-          <stringProp name="TCPSampler.server">127.0.0.1</stringProp>
-          <boolProp name="TCPSampler.reUseConnection">false</boolProp>
-          <stringProp name="TCPSampler.port">2404</stringProp>
-          <boolProp name="TCPSampler.nodelay">false</boolProp>
-          <stringProp name="TCPSampler.timeout">30000</stringProp>
-          <stringProp name="TCPSampler.ctimeout">30000</stringProp>
-          <stringProp name="TCPSampler.request">\x68\x02\x02\x68\x00\x00\x43\x00\x00\x00\x16 </stringProp>
-          <stringProp name="TCPSampler.EolByte">32</stringProp>
-          <stringProp name="ConfigTestElement.username"></stringProp>
-          <stringProp name="ConfigTestElement.password"></stringProp>
-        </TCPSampler>
-        <hashTree/>
         <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
@@ -92,17 +89,41 @@ String hostname = &quot;localhost&quot;
 int port = 2404
 byte[] byteArray = [0x68, 0x02, 0x02, 0x68, 0x00, 0x00, 0x43, 0x00, 0x00, 0x00, 0x16] as byte[]
 
-def socket = new Socket(hostname, port)
-def out = socket.getOutputStream()
-out.write(byteArray)
-out.flush()
-
-def in = socket.getInputStream()
-byte[] response = new byte[1024]
-int bytesRead = in.read(response)
-log.info(&quot;Received: &quot; + new String(response, 0, bytesRead))
-
-//socket.close()</stringProp>
+try {
+    def socket = new Socket(hostname, port)
+    try {
+        // Send request
+        def out = socket.getOutputStream()
+        out.write(byteArray)
+        out.flush()
+        
+        // Receive response
+        def in = socket.getInputStream()
+        byte[] response = new byte[1024]
+        int bytesRead = in.read(response)
+        
+        if (bytesRead == -1) {
+            log.warn(&quot;No data received from server&quot;)
+            SampleResult.setSuccessful(false)
+            SampleResult.setResponseMessage(&quot;No response received from server&quot;)
+        } else {
+            String responseStr = new String(response, 0, bytesRead)
+            log.info(&quot;Received: &quot; + responseStr)
+            SampleResult.setResponseData(responseStr, &quot;UTF-8&quot;)
+            SampleResult.setSuccessful(true)
+        }
+    } catch (Exception e) {
+        log.error(&quot;Error during communication: &quot; + e.getMessage(), e)
+        SampleResult.setSuccessful(false)
+        SampleResult.setResponseMessage(e.getMessage())
+    } finally {
+        socket.close()
+    }
+} catch (ConnectException e) {
+    log.error(&quot;Connection failed: &quot; + e.getMessage(), e)
+    SampleResult.setSuccessful(false)
+    SampleResult.setResponseMessage(&quot;Connection failed: &quot; + e.getMessage())
+}</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223Sampler>
         <hashTree/>
